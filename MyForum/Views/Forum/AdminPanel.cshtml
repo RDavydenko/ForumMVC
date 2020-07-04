@@ -1,0 +1,836 @@
+﻿@model IEnumerable<User>
+@{
+   Layout = "_Layout";
+   ViewData["Title"] = "Кабинет администратора";
+   var users = ViewBag.Users as IEnumerable<MyForum.ViewModels.AdminPanel.UserAdminPanelViewModel>;
+}
+
+<link rel="stylesheet" href="~/css/my-forms.css">
+<link rel="stylesheet" href="~/css/admin-panel.css">
+
+<div class="my-form-wrap">
+   <div id="loading" class="loading">
+      <img src="~/images/loading-2.gif" alt="">
+      <div class="loading-title">Загрузка...</div>
+   </div>
+   <div class="admin-cabinet">
+      <h1 class="title">Кабинет администратора</h1>
+      <div class="group-buttons clearfix">
+         <div class="relay-buttons">
+            <button id="users-button" class="relay-button btn btn-primary">Пользователи</button>
+            <button id="roles-button" class="relay-button btn btn-outline-secondary">Роли</button>
+            <button id="reports-button" class="relay-button btn btn-outline-secondary">Жалобы и события</button>
+            <button id="categories-button" class="relay-button btn btn-outline-secondary">Категории</button>
+            <button id="sections-button" class="relay-button btn btn-outline-secondary">Разделы</button>
+            <button id="themes-button" class="relay-button btn btn-outline-secondary">Темы</button>
+            @Html.AntiForgeryToken()
+         </div>
+         <script>
+            var isRolesLoaded = false;
+            jQuery(document).ready(() => {
+               $("#roles-button").click(() => {
+                  if (!isRolesLoaded) {
+                     var token = $('input[name="__RequestVerificationToken"]').val();
+                     $.ajax({
+                        url: "/Forum/AdminPanelRoles",
+                        type: "POST",
+                        data: {
+                           __RequestVerificationToken: token
+                        },
+                        success: (result) => {
+                           for (let i = 0; i < result.length; i++) {
+                              var rolesTableLastRow = $("#roles-table tr:last");
+                              var lastRow = "<tr id='role-" + result[i].id + "'><td id ='number-2'>" + (i + 1) + "</td><td id='name-2'>" + result[i].name + "</td><td id='users-count-2'>" + result[i].usersCount + "</td><td id='actions-2' class='actions'>";
+                              lastRow += "<a href='/Forum/Edit?id=" + result[i].id + "&objectType=role' target='_blank' class='btn btn-sm btn-outline-success mr-1 edit'><img src='/images/icon-pencil.png' alt=''></a><button class='btn btn-sm btn-outline-danger delete'><img src='/images/icon-trash-can.png' alt=''></button>";
+                              lastRow += "</td></tr>";
+                              rolesTableLastRow.after(lastRow);
+
+                              $("#role-" + result[i].id + " button.delete").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Delete",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "role"
+                                    },
+                                    success: () => {
+                                       $("#role-" + result[i].id).remove();
+                                    }
+                                 });
+                              });
+                           }
+                        }
+                     });
+                     isRolesLoaded = true;
+                  }
+               });
+            });
+         </script>
+         <script>
+            var isReportsLoaded = false;
+            jQuery(document).ready(() => {
+               $("#reports-button").click(() => {
+                  if (!isReportsLoaded) {
+                     var token = $('input[name="__RequestVerificationToken"]').val();
+                     $.ajax({
+                        url: "/Forum/AdminPanelReports",
+                        type: "POST",
+                        data: {
+                           __RequestVerificationToken: token
+                        },
+                        success: (result) => {
+                           for (let i = 0; i < result.length; i++) {
+                              var reportsTableLastRow = $("#reports-table tr:last");
+                              var newReportRow = "<tr id='report-" + result[i].id + "'><td id='number-3'>" + (i + 1) + "</td><td id='object-3'><a href='/Forum/ReportsRedirect?id=" + result[i].objectId + "&type=" + result[i].type + "' target='_blank'>" + result[i].objectName + "</a></td><td id='type-3'>" + result[i].type + "</td><td id='initiator-3'><a href='/Forum/AboutUser?id=" + result[i].initiatorId + "'>" + result[i].initiatorName + "</a></td><td id='description-3'>" + result[i].text + "</td><td id='time-3'>" + result[i].time + "</td><td id='actions-3' class='actions'>";
+                              if (!result[i].isChecked) {
+                                 newReportRow += "<button class='btn btn-sm btn-outline-success mr-1 check'><img src='/images/icon-checkmark-2.png' alt=''></button>";
+                              }
+                              newReportRow += "<button class='btn btn-sm btn-outline-danger delete'><img src='/images/icon-trash-can.png' alt=''></button></td></tr>";
+                              reportsTableLastRow.after(newReportRow);
+                              if (result[i].isChecked) {
+                                 $("#report-" + result[i].id).addClass("alert-success");
+                              }
+
+                              $("#report-" + result[i].id + " button.delete").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Delete",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "report"
+                                    },
+                                    success: () => {
+                                       $("#report-" + result[i].id).remove();
+                                    }
+                                 });
+                              });
+
+                              if (!result[i].isChecked) {
+                                 $("#report-" + result[i].id + " button.check").click(() => {
+                                    $.ajax({
+                                       url: "/Forum/CheckReport",
+                                       type: "POST",
+                                       data: {
+                                          id: result[i].id
+                                       },
+                                       success: () => {
+                                          $("#report-" + result[i].id).addClass("alert-success");
+                                          $("#report-" + result[i].id + " button.check").remove();
+                                       }
+                                    });
+                                 });
+                              }
+                           }
+                        }
+                     });
+                     isReportsLoaded = true;
+                  }
+               });
+            });
+         </script>
+         <script>
+            var isCategoriesLoaded = false;
+            jQuery(document).ready(() => {
+               $("#categories-button").click(() => {
+                  if (!isCategoriesLoaded) {
+                     var token = $('input[name="__RequestVerificationToken"]').val();
+                     $.ajax({
+                        url: "/Forum/AdminPanelCategories",
+                        type: "POST",
+                        data: {
+                           __RequestVerificationToken: token
+                        },
+                        success: (result) => {
+                           for (let i = 0; i < result.length; i++) {
+                              var categoriesTableLastRow = $("#categories-table tr:last");
+                              var newCategoryRow = "<tr id='category-" + result[i].id + "'><td id ='number-4'>" + (i + 1) + "</td><td id='title-4'><a href='/Forum/Category?id=" + result[i].id + "'>" + result[i].title + "</a></td><td id='sections-4'><ul>";
+                              for (let j = 0; j < result[i].sections.length; j++) {
+                                 newCategoryRow += "<li><a href='/Forum/Section?id=" + result[i].sections[j].id + "'>" + result[i].sections[j].title + "</a></li>";
+                              }
+                              newCategoryRow += "</ul></td><td id='is-hidden-4'>";
+                              if (result[i].isHidden)
+                                 newCategoryRow += "Да";
+                              newCategoryRow += "</td><td id='actions-4' class='actions'><a href='/Forum/Edit?id=" + result[i].id + "&objectType=category' target='_blank' class='btn btn-sm btn-outline-success mr-1'><img src='/images/icon-pencil.png' alt=''></a>";
+                              if (result[i].isHidden)
+                                 newCategoryRow += "<button class='btn btn-sm btn-outline-info mr-1 unhide'><img src='/images/icon-hide.png' alt =''></button><button style='display:none' class='btn btn-sm btn-outline-info mr-1 hide'><img src='/images/icon-show.png' alt =''></button>";
+                              else
+                                 newCategoryRow += "<button style='display:none' class='btn btn-sm btn-outline-info mr-1 unhide'><img src='/images/icon-hide.png' alt =''><button class='btn btn-sm btn-outline-info mr-1 hide'><img src='/images/icon-show.png' alt =''></button>";
+                              newCategoryRow += '<button class="btn btn-sm btn-outline-danger delete"><img src="/images/icon-trash-can.png" alt=""></button></td></tr>';
+                              categoriesTableLastRow.after(newCategoryRow);
+
+                              $("#category-" + result[i].id + " button.hide").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Hide",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "category"
+                                    },
+                                    success: () => {
+                                       $("#category-" + result[i].id + " button.hide").hide();
+                                       $("#category-" + result[i].id + " #is-hidden-4").text("Да");
+                                       $("#category-" + result[i].id + " button.unhide").show();
+                                    }
+                                 });
+                              });
+
+                              $("#category-" + result[i].id + " button.unhide").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Unhide",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "category"
+                                    },
+                                    success: () => {
+                                       $("#category-" + result[i].id + " button.hide").show();
+                                       $("#category-" + result[i].id + " #is-hidden-4").text("");
+                                       $("#category-" + result[i].id + " button.unhide").hide();
+                                    }
+                                 });
+                              });
+
+                              $("#category-" + result[i].id + " button.delete").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Delete",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "category"
+                                    },
+                                    success: () => {
+                                       $("#category-" + result[i].id).remove();
+                                    }
+                                 });
+                              });
+                           }
+                        }
+                     });
+                     isCategoriesLoaded = true;
+                  }
+               });
+            });
+         </script>
+         <script>
+            var isSectionsLoaded = false;
+            jQuery(document).ready(() => {
+               $("#sections-button").click(() => {
+                  if (!isSectionsLoaded) {
+                     var token = $('input[name="__RequestVerificationToken"]').val();
+                     $.ajax({
+                        url: "/Forum/AdminPanelSections",
+                        type: "POST",
+                        data: {
+                           __RequestVerificationToken: token
+                        },
+                        success: (result) => {
+                           for (let i = 0; i < result.length; i++) {
+                              var sectionsTableLastRow = $("#sections-table tr:last");
+                              var newSectionRow = '<tr id="section-' + result[i].id + '"><td id="number-5">' + (i + 1) + '</td><td id="title-5"><a href="/Forum/Section?id=' + result[i].id + '">' + result[i].title + '</a></td><td id="description-5">' + result[i].description + '</td><td id="themes-count-5">' + result[i].themesCount + '</td><td id="themes-5"><ul>';
+                              for (let j = 0; j < result[i].themes.length; j++) {
+                                 newSectionRow += '<li><a href="/Forum/Theme?id=' + result[i].themes[j].id + '">' + result[i].themes[j].title + '</a></li>';
+                              }
+                              newSectionRow += '</ul></td><td id="is-hidden-5">';
+                              if (result[i].isHidden)
+                                 newSectionRow += 'Да';
+                              newSectionRow += '</td><td id="actions-5" class="actions"><a href="/Forum/Edit?id=' + result[i].id + '&objectType=section" target="_blank" class="btn btn-sm btn-outline-success mr-1"><img src="/images/icon-pencil.png" alt=""></a>';
+                              if (result[i].isHidden)
+                                 newSectionRow += "<button class='btn btn-sm btn-outline-info mr-1 unhide'><img src='/images/icon-hide.png' alt =''></button><button style='display:none' class='btn btn-sm btn-outline-info mr-1 hide'><img src='/images/icon-show.png' alt =''></button>";
+                              else
+                                 newSectionRow += "<button style='display:none' class='btn btn-sm btn-outline-info mr-1 unhide'><img src='/images/icon-hide.png' alt =''></button><button class='btn btn-sm btn-outline-info mr-1 hide'><img src='/images/icon-show.png' alt =''></button>";
+                              newSectionRow += '<button class="btn btn-sm btn-outline-danger mr-1 delete"><img src="/images/icon-trash-can.png" alt=""></button></td></tr>';
+                              sectionsTableLastRow.after(newSectionRow);
+
+                              $("#section-" + result[i].id + " button.hide").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Hide",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "section"
+                                    },
+                                    success: () => {
+                                       $("#section-" + result[i].id + " button.hide").hide();
+                                       $("#section-" + result[i].id + " #is-hidden-5").text("Да");
+                                       $("#section-" + result[i].id + " button.unhide").show();
+                                    }
+                                 });
+                              });
+
+                              $("#section-" + result[i].id + " button.unhide").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Unhide",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "section"
+                                    },
+                                    success: () => {
+                                       $("#section-" + result[i].id + " button.hide").show();
+                                       $("#section-" + result[i].id + " #is-hidden-5").text("");
+                                       $("#section-" + result[i].id + " button.unhide").hide();
+                                    }
+                                 });
+                              });
+
+                              $("#section-" + result[i].id + " button.delete").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Delete",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "section"
+                                    },
+                                    success: () => {
+                                       $("#section-" + result[i].id).remove();
+                                    }
+                                 });
+                              });
+                           }
+                        }
+                     });
+                     isSectionsLoaded = true;
+                  }
+               });
+            });
+         </script>
+         <script>
+            var isThemesLoaded = false;
+            jQuery(document).ready(() => {
+               $("#themes-button").click(() => {
+                  if (!isThemesLoaded) {
+                     var token = $('input[name="__RequestVerificationToken"]').val();
+                     $.ajax({
+                        url: "/Forum/AdminPanelThemes",
+                        type: "POST",
+                        data: {
+                           __RequestVerificationToken: token
+                        },
+                        success: (result) => {
+                           for (let i = 0; i < result.length; i++) {
+                              var themesTableLastRow = $("#themes-table tr:last");
+                              var newThemeRow = '<tr id="theme-' + result[i].id + '"><td id="number-6">' + (i + 1) + '</td><td id="title-6"><a href="/Forum/Theme?id=' + result[i].id + '">' + result[i].title + '</a></td><td class="description" id="description-6"><div class="description-show-btn">Показать...</div><div style="display:none;" class="description-content">' + result[i].description + '<div class="description-hide-btn">Скрыть</div></div></td><td id="creator-6"><a href="/Forum/AboutUser?id=' + result[i].creatorId + '">' + result[i].creatorName + '</a></td><td id="creating-date-6">' + result[i].creatingTime + '</td><td id="messages-count-6">' + result[i].messagesCount + '</td><td id="is-closed-6">';
+                              if (result[i].isClosed)
+                                 newThemeRow += 'Да';
+                              newThemeRow += '</td><td id="is-hidden-6">';
+                              if (result[i].isHidden)
+                                 newThemeRow += 'Да';
+                              newThemeRow += '</td><td id="actions-6" class="actions"><a href="/Forum/Edit?id=' + result[i].id + '&objectType=theme" target="_blank" class="btn btn-sm btn-outline-success mr-1"><img src="/images/icon-pencil.png" alt=""></a>';
+                              if (result[i].isClosed)
+                                 newThemeRow += '<button class="btn btn-sm btn-outline-warning mr-1 open"><img src="/images/icon-closed-lock.png" alt=""></button><button style="display:none" class="btn btn-sm btn-outline-warning mr-1 my-close"><img src="/images/icon-key.png" alt=""></button>';
+                              else
+                                 newThemeRow += '<button style="display:none" class="btn btn-sm btn-outline-warning mr-1 open"><img src="/images/icon-closed-lock.png" alt=""></button><button class="btn btn-sm btn-outline-warning mr-1 my-close"><img src="/images/icon-key.png" alt=""></button>';
+
+                              if (result[i].isHidden)
+                                 newThemeRow += "<button class='btn btn-sm btn-outline-info mr-1 unhide'><img src='/images/icon-hide.png' alt =''></button><button style='display:none' class='btn btn-sm btn-outline-info mr-1 hide'><img src='/images/icon-show.png' alt =''></button>";
+                              else
+                                 newThemeRow += "<button style='display:none' class='btn btn-sm btn-outline-info mr-1 unhide'><img src='/images/icon-hide.png' alt =''></button><button class='btn btn-sm btn-outline-info mr-1 hide'><img src='/images/icon-show.png' alt =''></button>";
+
+                              newThemeRow += '<button class="btn btn-sm btn-outline-danger mr-1 delete"><img src="/images/icon-trash-can.png" alt=""></button></td></tr>';
+                              themesTableLastRow.after(newThemeRow);
+
+                              $("#theme-" + result[i].id + " button.open").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/OpenTheme",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id
+                                    },
+                                    success: () => {
+                                       $("#theme-" + result[i].id + " button.open").hide();
+                                       $("#theme-" + result[i].id + " #is-closed-6").text("");
+                                       $("#theme-" + result[i].id + " button.my-close").show();
+                                    }
+                                 });
+                              });
+
+                              $("#theme-" + result[i].id + " button.my-close").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/CloseTheme",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id
+                                    },
+                                    success: () => {
+                                       $("#theme-" + result[i].id + " button.my-close").hide();
+                                       $("#theme-" + result[i].id + " #is-closed-6").text("Да");
+                                       $("#theme-" + result[i].id + " button.open").show();
+                                    }
+                                 });
+                              });
+
+                              $("#theme-" + result[i].id + " button.hide").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Hide",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "theme"
+                                    },
+                                    success: () => {
+                                       $("#theme-" + result[i].id + " button.hide").hide();
+                                       $("#theme-" + result[i].id + " #is-hidden-6").text("Да");
+                                       $("#theme-" + result[i].id + " button.unhide").show();
+                                    }
+                                 });
+                              });
+
+                              $("#theme-" + result[i].id + " button.unhide").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Unhide",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "theme"
+                                    },
+                                    success: () => {
+                                       $("#theme-" + result[i].id + " button.hide").show();
+                                       $("#theme-" + result[i].id + " #is-hidden-6").text("");
+                                       $("#theme-" + result[i].id + " button.unhide").hide();
+                                    }
+                                 });
+                              });
+
+                              $("#theme-" + result[i].id + " button.delete").click(() => {
+                                 $.ajax({
+                                    url: "/Forum/Delete",
+                                    type: "POST",
+                                    data: {
+                                       id: result[i].id,
+                                       objectType: "theme"
+                                    },
+                                    success: () => {
+                                       $("#theme-" + result[i].id).remove();
+                                    }
+                                 });
+                              });
+                           }
+                           hideOrShowDescription();
+                        }
+                     });
+                     isThemesLoaded = true;
+                  }
+               });
+            });
+         </script>
+
+         <div id="search-field" class="input-group search-field mt-2">
+            <div class="input-group-prepend">
+               <span class="input-group-text">Поиск</span>
+            </div>
+            <input id="search-text-input" class="search-text-input form-control" type="text">
+            <div class="input-group-append">
+               <button id="dropdown-btn" type="button"
+                       class="border-radius-0 btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+               <div id="search-dropdown-menu" class="dropdown-menu">
+                  <button id="users-search-for-user_name" class="dropdown-item">По имени</button>
+                  <button id="users-search-for-email" class="dropdown-item">По Email</button>
+                  <button id="users-search-for-status" class="dropdown-item">По статусу</button>
+                  <button id="users-search-for-roles" class="dropdown-item">По роли</button>
+               </div>
+               <button id="search-btn" class="search-btn btn btn-outline-secondary" type="button">
+                  <img src="~/images/icon-find.png" alt="">
+               </button>
+            </div>
+         </div>
+         <small id="about-search-type" class="text-muted">Выберите критерий поиска</small>
+      </div>
+
+      <div id="users-content" class="admin-content relay-content">
+         <h3 class="sub-title">Пользователи</h3>
+         <div id="users-checkboxes" class="checkboxes mb-2">
+            <span class="mr-1">Отображать:</span>
+            <div class="form-check-inline ">
+               <input id="number-1" type="checkbox" checked class="form-check-input">
+               <label for="number-1" class="form-check-label">№</label>
+            </div>
+            <div class="form-check-inline ">
+               <input id="user_name-1" type="checkbox" checked class="form-check-input">
+               <label for="user_name-1" class="form-check-label">Имя</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="email-1" type="checkbox" checked class="form-check-input">
+               <label for="email-1" class="form-check-label">Email</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="status-1" type="checkbox" checked class="form-check-input">
+               <label for="status-1" class="form-check-label">Статус</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="messages-1" type="checkbox" checked class="form-check-input">
+               <label for="messages-1" class="form-check-label">С-я</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="themes-1" type="checkbox" checked class="form-check-input">
+               <label for="themes-1" class="form-check-label">Темы</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="roles-1" type="checkbox" checked class="form-check-input">
+               <label for="roles-1" class="form-check-label">Роли</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="registration-date-1" type="checkbox" checked class="form-check-input">
+               <label for="registration-date-1" class="form-check-label">Регистрация</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="is-silenced-1" type="checkbox" checked class="form-check-input">
+               <label for="is-silenced-1" class="form-check-label">Заморожен?</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="stop-time-silence-1" type="checkbox" checked class="form-check-input">
+               <label for="stop-time-silence-1" class="form-check-label">Заморожен до</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="actions-1" type="checkbox" checked class="form-check-input">
+               <label for="actions-1" class="form-check-label">Управление</label>
+            </div>
+            <button id="users-sort-button" class="btn btn-sm btn-info">Применить</button>
+         </div>
+
+         <table id="users-table" class="content-table table">
+            <tr>
+               <th id="number-1">№</th>
+               <th id="user_name-1">Имя</th>
+               <th id="email-1">Email</th>
+               <th id="status-1">Статус</th>
+               <th id="messages-1" title="Сообщения">С-я</th>
+               <th id="themes-1">Темы</th>
+               <th id="roles-1">Роли</th>
+               <th id="registration-date-1">Регистрация</th>
+               <th id="is-silenced-1">Заморожен?</th>
+               <th id="stop-time-silence-1">Заморожен до...</th>
+               <th id="actions-1">Управление</th>
+            </tr>
+            @{
+               int userIndex = 1;
+            }
+            @foreach (var user in users)
+            {
+               <tr id="@("user-"+ user.Id)">
+                  <td id="number-1">@userIndex.ToString()</td>
+                  <td id="user_name-1"><a asp-action="AboutUser" asp-controller="Forum" asp-route-id="@user.Id">@user.UserName</a></td>
+                  <td id="email-1">@user.Email</td>
+                  <td id="status-1">@user.Status</td>
+                  <td id="messages-1">@user.MessagesCount</td>
+                  <td id="themes-1">@user.ThemesCount</td>
+                  <td id="roles-1">@string.Join(", ", user.RoleNames)</td>
+                  <td id="registration-date-1">@user.RegistrationDate.ToString("dd.MM.yyyy HH:mm")</td>
+                  @if (user.IsSilenced)
+                  {
+                     <td id="is-silenced-1">Да</td>
+                     <td id="stop-time-silence-1">@user.SilenceStopTime?.ToString("dd.MM.yyyy HH:mm")</td>
+                  }
+                  else
+                  {
+                     <td id="is-silenced-1"></td>
+                     <td id="stop-time-silence-1"></td>
+                  }
+                  <td id="actions-1" class="actions">
+                     <a asp-action="Edit" asp-controller="Forum" asp-route-id="@user.Id" asp-route-objectType="user" class="btn btn-sm btn-outline-success">
+                        <img src="~/images/icon-pencil.png" alt="">
+                     </a>
+                     @if (user.IsSilenced)
+                     {
+                        <button class="btn btn-sm btn-outline-info unsilence">
+                           <img src="~/images/icon-silence-2.png" alt="">
+                        </button>
+                        <button style="display:none" class="btn btn-sm btn-outline-info silence">
+                           <img src="~/images/icon-unsilence-2.png" alt="">
+                        </button>
+                     }
+                     else
+                     {
+                        <button style="display:none" class="btn btn-sm btn-outline-info unsilence">
+                           <img src="~/images/icon-silence-2.png" alt="">
+                        </button>
+                        <button class="btn btn-sm btn-outline-info silence">
+                           <img src="~/images/icon-unsilence-2.png" alt="">
+                        </button>
+                     }
+                     @*<button class="btn btn-sm btn-outline-danger">
+                           <img src="~/images/icon-trash-can.png" alt="">
+                        </button>*@
+                     <script>
+                        $('@("#user-" + user.Id + " button.unsilence")').click(() => {
+                           $.ajax({
+                              url: "/Forum/UnsilenceUser",
+                              type: "POST",
+                              data: {
+                                 id: '@user.Id'
+                              },
+                              success: () => {
+                                 $('@("#user-" + user.Id + " button.unsilence")').hide();
+                                 $('@("#user-" + user.Id + " button.silence")').show();
+                                 $('@("#user-" + user.Id + " #is-silenced-1")').text("");
+                                 $('@("#user-" + user.Id + " #stop-time-silence-1")').text("");
+                              }
+                           });
+                        });
+
+                     $('@("#user-" + user.Id + " button.silence")').click(() => {
+                        let minutes = prompt('На сколько минут заблокировать пользователя?\n60 - час\n1440 - день\n10080 - неделя\n43200 - месяц (30 дней)');
+                        if (minutes <= 0) {
+                           return;
+                        }
+                           $.ajax({
+                              url: "/Forum/SilenceUser",
+                              type: "POST",
+                              data: {
+                                 id: '@user.Id',
+                                 minutes: minutes,
+                                 needTimeReturn: true
+                              },
+                              success: (result) => {
+                                 $('@("#user-" + user.Id + " button.silence")').hide();
+                                 $('@("#user-" + user.Id + " button.unsilence")').show();
+                                 $('@("#user-" + user.Id + " #is-silenced-1")').text("Да");
+                                 $('@("#user-" + user.Id + " #stop-time-silence-1")').text(result);
+                              }
+                           });
+                        });
+                     </script>
+                  </td>
+               </tr>
+               userIndex++;
+            }
+         </table>
+      </div>
+
+      <div id="roles-content" style="display:none" class="admin-content relay-content">
+         <h3 class="sub-title">Роли</h3>
+         <div id="roles-checkboxes" class="checkboxes mb-2">
+            <span class="mr-1">Отображать:</span>
+            <div class="form-check-inline ">
+               <input id="number-2" type="checkbox" checked class="form-check-input">
+               <label for="number-2" class="form-check-label">№</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="name-2" type="checkbox" checked class="form-check-input">
+               <label for="name-2" class="form-check-label">Название</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="users-count-2" type="checkbox" checked class="form-check-input">
+               <label for="users-count-2" class="form-check-label">Кол-во пользователей</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="actions-2" type="checkbox" checked class="form-check-input">
+               <label for="actions-2" class="form-check-label">Управление</label>
+            </div>
+            <button id="roles-sort-button" class="btn btn-sm btn-info">Применить</button>
+         </div>
+
+         <table id="roles-table" class="content-table table">
+            <tr>
+               <th id="number-2">№</th>
+               <th id="name-2">Название</th>
+               <th id="users-count-2">Кол-во пользователей</th>
+               <th id="actions-2">Управление</th>
+            </tr>
+         </table>
+         <div>
+            <a asp-action="CreateRole" asp-controller="Forum" class="btn btn-info">Создать роль</a>
+         </div>
+      </div>
+
+      <div id="reports-content" style="display:none" class="admin-content relay-content">
+         <h3 class="sub-title">Жалобы и события</h3>
+         <div id="reports-checkboxes" class="checkboxes mb-2">
+            <span class="mr-1">Отображать:</span>
+            <div class="form-check-inline ">
+               <input id="number-3" type="checkbox" checked class="form-check-input">
+               <label for="number-3" class="form-check-label">№</label>
+            </div>
+            <div class="form-check-inline ">
+               <input id="object-3" type="checkbox" checked class="form-check-input">
+               <label for="object-3" class="form-check-label">Объект</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="type-3" type="checkbox" checked class="form-check-input">
+               <label for="type-3" class="form-check-label">Тип</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="initiator-3" type="checkbox" checked class="form-check-input">
+               <label for="initiator-3" class="form-check-label">Инициатор</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="description-3" type="checkbox" checked class="form-check-input">
+               <label for="description-3" class="form-check-label">Описание</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="time-3" type="checkbox" checked class="form-check-input">
+               <label for="time-3" class="form-check-label">Время</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="actions-3" type="checkbox" checked class="form-check-input">
+               <label for="actions-3" class="form-check-label">Управление</label>
+            </div>
+            <button id="reports-sort-button" class="btn btn-sm btn-info">Применить</button>
+         </div>
+         <table id="reports-table" class="content-table table">
+            <tr>
+               <th id="number-3">№</th>
+               <th id="object-3">Объект</th>
+               <th id="type-3">Тип</th>
+               <th id="initiator-3">Инициатор</th>
+               <th id="description-3">Описание</th>
+               <th id="time-3">Время</th>
+               <th id="actions-3">Управление</th>
+            </tr>
+         </table>
+      </div>
+
+      <div id="categories-content" style="display:none" class="admin-content relay-content">
+         <h3 class="sub-title">Категории</h3>
+         <div id="categories-checkboxes" class="checkboxes mb-2">
+            <span class="mr-1">Отображать:</span>
+            <div class="form-check-inline ">
+               <input id="number-4" type="checkbox" checked class="form-check-input">
+               <label for="number-4" class="form-check-label">№</label>
+            </div>
+            <div class="form-check-inline ">
+               <input id="title-4" type="checkbox" checked class="form-check-input">
+               <label for="title-4" class="form-check-label">Название</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="sections-4" type="checkbox" checked class="form-check-input">
+               <label for="sections-4" class="form-check-label">Входящие разделы</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="is-hidden-4" type="checkbox" checked class="form-check-input">
+               <label for="is-hidden-4" class="form-check-label">Скрыта</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="actions-4" type="checkbox" checked class="form-check-input">
+               <label for="actions-4" class="form-check-label">Управление</label>
+            </div>
+            <button id="categories-sort-button" class="btn btn-sm btn-info">Применить</button>
+         </div>
+         <table id="categories-table" class="content-table table">
+            <tr>
+               <th id="number-4">№</th>
+               <th id="title-4">Название</th>
+               <th id="sections-4">Входящие разделы</th>
+               <th id="is-hidden-4">Скрыта</th>
+               <th id="actions-4">Управление</th>
+            </tr>
+         </table>
+         <div>
+            <a asp-action="CreateCategory" asp-controller="Forum" class="btn btn-info">Создать категорию</a>
+         </div>
+      </div>
+
+      <div id="sections-content" style="display:none" class="admin-content relay-content">
+         <h3 class="sub-title">Разделы</h3>
+         <div id="sections-checkboxes" class="checkboxes mb-2">
+            <span class="mr-1">Отображать:</span>
+            <div class="form-check-inline ">
+               <input id="number-5" type="checkbox" checked class="form-check-input">
+               <label for="number-5" class="form-check-label">№</label>
+            </div>
+            <div class="form-check-inline ">
+               <input id="title-5" type="checkbox" checked class="form-check-input">
+               <label for="title-5" class="form-check-label">Название</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="description-5" type="checkbox" checked class="form-check-input">
+               <label for="description-5" class="form-check-label">Описание</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="themes-count-5" type="checkbox" checked class="form-check-input">
+               <label for="themes-count-5" class="form-check-label">Тем</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="themes-5" type="checkbox" checked class="form-check-input">
+               <label for="themes-5" class="form-check-label">Темы</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="is-hidden-5" type="checkbox" checked class="form-check-input">
+               <label for="is-hidden-5" class="form-check-label">Скрыт</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="actions-5" type="checkbox" checked class="form-check-input">
+               <label for="actions-5" class="form-check-label">Управление</label>
+            </div>
+            <button id="sections-sort-button" class="btn btn-sm btn-info">Применить</button>
+         </div>
+         <table id="sections-table" class="content-table table">
+            <tr>
+               <th id="number-5">№</th>
+               <th id="title-5">Название</th>
+               <th id="description-5">Описание</th>
+               <th id="themes-count-5">Тем</th>
+               <th id="themes-5">Темы</th>
+               <th id="is-hidden-5">Скрыт</th>
+               <th id="actions-5">Управление</th>
+            </tr>
+         </table>
+         <div>
+            <a asp-action="CreateSection" asp-controller="Forum" class="btn btn-info">Создать раздел</a>
+         </div>
+      </div>
+
+      <div id="themes-content" style="display:none" class="admin-content relay-content">
+         <h3 class="sub-title">Темы</h3>
+         <div id="themes-checkboxes" class="checkboxes mb-2">
+            <span class="mr-1">Отображать:</span>
+            <div class="form-check-inline ">
+               <input id="number-6" type="checkbox" checked class="form-check-input">
+               <label for="number-6" class="form-check-label">№</label>
+            </div>
+            <div class="form-check-inline ">
+               <input id="title-6" type="checkbox" checked class="form-check-input">
+               <label for="title-6" class="form-check-label">Название</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="description-6" type="checkbox" checked class="form-check-input">
+               <label for="description-6" class="form-check-label">Описание</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="creator-6" type="checkbox" checked class="form-check-input">
+               <label for="creator-6" class="form-check-label">Создатель</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="creating-date-6" type="checkbox" checked class="form-check-input">
+               <label for="creating-date-6" class="form-check-label">Создана</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="messages-count-6" type="checkbox" checked class="form-check-input">
+               <label for="messages-count-6" class="form-check-label">С-я</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="is-closed-6" type="checkbox" checked class="form-check-input">
+               <label for="is-closed-6" class="form-check-label">Закрыта</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="is-hidden-6" type="checkbox" checked class="form-check-input">
+               <label for="is-hidden-6" class="form-check-label">Скрыта</label>
+            </div>
+            <div class="form-check-inline">
+               <input id="actions-6" type="checkbox" checked class="form-check-input">
+               <label for="actions-6" class="form-check-label">Управление</label>
+            </div>
+            <button id="themes-sort-button" class="btn btn-sm btn-info">Применить</button>
+         </div>
+         <table id="themes-table" class="content-table table">
+            <tr>
+               <th id="number-6">№</th>
+               <th id="title-6">Название</th>
+               <th id="description-6">Описание</th>
+               <th id="creator-6">Создатель</th>
+               <th id="creating-date-6">Создана</th>
+               <th id="messages-count-6" title="Сообщения">С-я</th>
+               <th id="is-closed-6">Закрыта</th>
+               <th id="is-hidden-6">Скрыта</th>
+               <th id="actions-6">Управление</th>
+            </tr>
+         </table>
+         <div>
+            <a asp-action="CreateTheme" asp-controller="Forum" class="btn btn-info">Создать тему</a>
+         </div>
+      </div>
+
+   </div>
+</div>
+
+<script src="~/js/admin-panel.js"></script>

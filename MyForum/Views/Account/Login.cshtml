@@ -1,0 +1,32 @@
+﻿@model MyForum.ViewModels.LoginViewModel
+@{
+	ViewData["Title"] = "Вход";
+}
+<link href="~/css/account.css" rel="stylesheet" />
+<div class="account-form-block">
+	<div class="account-form-block__inner">
+		<h1 class="account-form-title">Вход</h1>
+		<form asp-action="Login" asp-controller="Account" asp-antiforgery="true" asp-route-ReturnUrl="@Context.Request.Query["ReturnUrl"]"
+			  method="post">
+			<div asp-validation-summary="ModelOnly" class="validation text-danger"></div>
+			<div>
+				<div name="validation-group" class="form-group">
+					<label asp-for="EmailOrLogin" class="form-group-label">Email или логин</label>
+					<input asp-for="EmailOrLogin" class="form-group-input" />
+					<span asp-validation-for="EmailOrLogin" class="text-danger"></span>
+				</div>
+				<div name="validation-group" class="form-group">
+					<label asp-for="Password" class="form-group-label">Пароль</label>
+					<input asp-for="Password" class="form-group-input" />
+					<span asp-validation-for="Password" class="text-danger"></span>
+				</div>
+				<div class="form-group">
+					<input class="btn btn-primary" type="submit" value="Войти" />
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="~/js/account-validate-change-color.js"></script>
+

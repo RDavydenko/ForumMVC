@@ -1,0 +1,53 @@
+.account-edit-block {
+  font-family: Verdana, sans-serif;
+  width: 100%;
+}
+
+.account-edit-block .account-edit-block__inner {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 40px;
+  padding: 20px;
+  margin: 0 auto;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  min-width: 450px;
+}
+
+.account-edit-block .account-edit-block__inner .validation {
+  padding-bottom: 10px;
+}
+
+.account-edit-block .account-edit-block__inner .account-form-title {
+  color: #fff;
+  text-align: center;
+}
+
+.account-edit-block .account-edit-block__inner .form-group {
+  position: relative;
+}
+
+.account-edit-block .account-edit-block__inner .form-group .form-group-label {
+  font-size: 11px;
+  color: #000;
+  position: absolute;
+  top: -55%;
+  left: 5%;
+}
+
+.account-edit-block .account-edit-block__inner .form-group .form-group-label.text-area-label {
+  top: -14%;
+}
+
+.account-edit-block .account-edit-block__inner .form-group .form-group-input {
+  border: 0.5px solid	#000;
+  border-radius: 10px;
+  padding-left: 5px;
+}
+
+.account-edit-block .account-edit-block__inner .form-group .form-group-input.text-area-input {
+  resize: none;
+  overflow: hidden;
+  width: 300px;
+  height: 100px;
+}

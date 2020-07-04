@@ -1,0 +1,173 @@
+﻿@model IEnumerable<MyForum.ViewModels.Index.IndexViewModel>
+
+@{
+	Layout = "_ForumLayout";
+	ViewData["Title"] = "Главная";
+}
+<link href="~/css/my-tables.css" rel="stylesheet" />
+
+<table>
+</table>
+<table class="my-table my-table-5">
+	<tr>
+		<th class="table-headers"></th>
+		<th class="table-headers">Раздел</th>
+		<th class="table-headers">Тем</th>
+		<th class="table-headers">Cообщений</th>
+		<th class="table-headers">Последнее сообщение</th>
+	</tr>
+	@foreach (var m in Model)
+	{
+		<!-- Название категории  -->
+		<tr class="category">
+			<td class="category-td" colspan="5">
+				<a asp-action="Category" asp-controller="Forum" asp-route-id="@m.Category.Id" class="category__title">@m.Category.Title</a>
+				<button class="message-actions-btn action-btn">
+					<div class="action-btn__actions">
+						@if (User.Identity.IsAuthenticated)
+						{
+							<div id="@("report-" + m.Category.Id)" class="action-btn__action">Пожаловаться</div>
+							// Отправка жалобы на категорию
+							<script>
+							$(document).ready(function() {
+								$('@("#report-" + m.Category.Id)').click(function (e) {
+									let text = prompt('Опишите причину жалобы:');
+									if (text != null && text != '') {
+										$.ajax({
+											url: '/Forum/Report',
+											type: 'POST',
+											data: { id: '@m.Category.Id',objectType:'category', text: text },
+											success: function () {
+												alert('Жалоба отправлена');
+											},
+											error: function () {
+												alert('Возникла ошибка при отправке жалобы');
+											}
+										});
+									}
+								});
+							});
+							</script>
+						}
+						@if (User.IsInRole("moder") || User.IsInRole("admin"))
+						{
+							@if (!m.Category.IsHidden)
+							{
+								<div id="@("hide-" + m.Category.Id)" class="action-btn__action">Скрыть категорию</div>
+								// Скрыть категорию
+								<script>
+								$(document).ready(function() {
+									$('@("#hide-" + m.Category.Id)').click(function (e) {
+										let confirmDelete = confirm('Вы уверены, что хотите скрыть категорию? (Разделы скрыты не будут)');
+										if (confirmDelete) {
+											$.ajax({
+												url: '/Forum/Hide',
+												type: 'POST',
+												data: { id: '@m.Category.Id', objectType: 'category'},
+												success: function () {
+													alert('Категория скрыта');
+													location.reload();
+												},
+												error: function () {
+													alert('Произошла ошибка');
+												}
+											});
+										}
+									});
+								});
+								</script>
+							}
+							else
+							{
+								<div id="@("unhide-" + m.Category.Id)" class="action-btn__action">Показать категорию</div>
+								// Показать категорию
+								<script>
+									$(document).ready(function() {
+										$('@("#unhide-" + m.Category.Id)').click(function (e) {
+											let confirmDelete = confirm('Вы уверены, что хотите показать категорию?');
+											if (confirmDelete) {
+												$.ajax({
+													url: '/Forum/Unhide',
+													type: 'POST',
+													data: { id: '@m.Category.Id', objectType: 'category'},
+													success: function () {
+														alert('Категория показана');
+														location.reload();
+													},
+													error: function () {
+														alert('Произошла ошибка');
+													}
+												});
+											}
+										});
+									});
+								</script>
+							}
+
+							<div id="@("delete-" + m.Category.Id)" class="action-btn__action">Удалить категорию</div>
+							// Удалить категорию
+							<script>
+							$(document).ready(function() {
+								$('@("#delete-" + m.Category.Id)').click(function (e) {
+									let confirmDelete = confirm('Вы уверены, что хотите удалить категорию? (Разделы удалены не будут)');
+									if (confirmDelete) {
+										$.ajax({
+											url: '/Forum/Delete',
+											type: 'POST',
+											data: { id: '@m.Category.Id', objectType: 'category'},
+											success: function () {
+												alert('Категория удалена');
+												location.reload();
+											},
+											error: function () {
+												alert('Произошла ошибка');
+											}
+										});
+									}
+								});
+							});
+							</script>
+
+							<a asp-action="Edit" asp-controller="Forum" asp-route-id="@m.Category.Id" asp-route-objectType="category" class="action-btn__action">Редактировать категорию</a>
+						}
+					</div>
+				</button>
+			</td>
+		</tr>
+		@foreach (var s in m.Category.Sections)
+		{
+			<!-- Секция (раздел) -->
+			<tr>
+				<td class="td-content td-image-fixed"><img src="~/images/section-folder.gif" alt="" class="section__img"></td>
+				<td class="td-content">
+					<a asp-action="Section" asp-controller="Forum" asp-route-id="@s.Id" class="content__title">@s.Title</a>
+					<p class="content__description">
+						@s.Description
+					</p>
+				</td>				
+				<td class="content__numbers td-content">
+					<div class="content__numbers__inner">@s.ThemesCount</div>
+				</td>
+				<td class="content__numbers td-content">
+					<div class="content__numbers__inner">@s.MessagesCount</div>
+				</td>
+				<td class="td-content td-last-message">
+					<div class="last-message">						
+						@if (s.LastMessage != null)
+						{
+							<img src="~/images/icon-list.gif" alt="" class="last-message__img">
+							<a asp-action="Theme" asp-controller="Forum" asp-route-id="@s.LastMessage.ThemeId" class="last-message__text">@s.LastMessage.Text</a>
+							<p class="last-message__author">от <a asp-action="AboutUser" asp-controller="Forum" asp-route-id="@s.LastMessage.AuthorId">@s.LastMessage.AuthorName</a></p>
+							<div class="last-message__link">
+								<a title="К последнему сообщению" asp-action="ThemeByMessage" asp-controller="Forum" asp-route-themeId="@s.LastMessage.ThemeId" asp-route-messageId="@s.LastMessage.MessageId" class="last-message__link-btn"></a>
+								<p class="last-message__date">@s.LastMessage.CreatingTime.ToString("dd.MM.yyyy") <span class="time">@s.LastMessage.CreatingTime.ToString("HH:mm")</span></p>
+							</div>
+						}
+					</div>
+				</td>
+			</tr>
+		}
+	}
+</table>
+
+<script src="~/js/action-btn.js"></script>

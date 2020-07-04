@@ -1,0 +1,114 @@
+﻿@model MyForum.ViewModels.EditCategoryViewModel
+@{
+	ViewData["Title"] = "Редактирование категории";
+}
+
+<link rel="stylesheet" href="~/css/my-forms.css">
+<style>
+	.gray {
+		color: gray;
+	}
+</style>
+
+<div class="my-form-wrap">
+	<div id="popup-block"></div>
+	<div class="my-form-group">
+		<label asp-for="Title" class="my-form-label">Название:</label>
+		<textarea id="title-textarea" class="my-form-textarea my-textarea-small">@Model.Title</textarea>
+		<span id="validation-span-for-title" class="my-validation-span text-danger"></span>
+	</div>
+	<div class="my-form-group">
+		<label asp-for="IsHidden" class="my-form-label">Скрыта? :</label>
+		<input id="is-hidden-checkbox" asp-for="IsHidden" class="my-form-checkbox" type="checkbox" />
+		<span asp-validation-for="IsHidden" class="my-validation-span text-danger"></span>
+	</div>
+	<div class="my-form__info-block">
+		@Html.AntiForgeryToken()
+		<div class="info-block__item"></div>
+	</div>
+
+	<h4>Входящие разделы:</h4>
+	<table class="table">
+		<tr>
+			<th>Входит?</th>
+			<th>Название раздела</th>
+			<th>Описание</th>
+		</tr>
+		@foreach (var s in Model.Sections)
+		{
+			<tr>
+				<td>
+					@if (s.CategoryId == Model.Id)
+					{
+						<input name="sectionId" value="@s.Id" class="my-form-checkbox form-control" type="checkbox" checked="checked" />
+					}
+					else
+					{
+						<input name="sectionId" value="@s.Id" class="my-form-checkbox form-control" type="checkbox" />
+					}
+				</td>
+				@{ 
+					var popupAboutHidden = "";
+					if (s.IsHidden)
+						popupAboutHidden = " (Скрытый раздел)";
+				}
+				<td><a asp-action="Section" asp-controller="Forum" asp-route-id="@s.Id">@s.Title</a><span class="gray">@popupAboutHidden</span></td>
+				<td>@s.Description</td>
+			</tr>
+		}
+	</table>
+
+	<div class="my-form-group">
+		<input id="save-btn" type="button" class="btn btn-success" value="Сохранить изменения">
+		<script>
+				$(document).ready(() => {
+					$('#save-btn').click(() => {
+						$('#validation-span-for-title').text('');
+                  if ($('#title-textarea').val().trim().length < 3 || $('#title-textarea').val().trim().length > 100) {
+							$('#validation-span-for-title').text('Допустимая длина - от 3 до 100 символов');
+						}
+						else {
+							var sectionInputs = document.getElementsByName('sectionId');
+							var activeSectionInputs = [];
+							var token = $('input[name="__RequestVerificationToken"]').val();
+							sectionInputs.forEach((item) => {
+								if (item.checked) {
+									activeSectionInputs.push(item.value);
+								}
+							});
+							var isHidden = document.getElementById('is-hidden-checkbox').checked;
+							$.ajax({
+								url: '/Forum/SaveCategory',
+								type: 'POST',
+								data: {
+									id: '@Model.Id',
+                           title: $('#title-textarea').val().trim(),
+									isHidden: isHidden,
+									sectionIds: activeSectionInputs,
+									__RequestVerificationToken: token
+								},
+								success: (result) => {
+                           if (result.popups != null && result.popups != undefined) {
+                              for (let i = 0; i < result.popups.length; i++) {                                
+                                 createPopup(result.popups[i].type, result.popups[i].text);
+                              }
+                           }
+								},
+								error: (result) => {
+                           if (result.popups != null && result.popups != undefined) {
+                              for (let i = 0; i < result.popups.length; i++) {                               
+                                 createPopup(result.popups[i].type, result.popups[i].text);
+                              }
+                           }
+								}
+							});
+						}
+
+					});
+				});
+		</script>
+	</div>
+
+</div>
+
+<script src="~/js/popup.js"></script>

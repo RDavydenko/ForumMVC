@@ -1,0 +1,44 @@
+﻿@model MyForum.ViewModels.EditMessageViewModel
+@{
+	ViewData["Title"] = "Редактирование сообщения";
+}
+
+<link rel="stylesheet" href="~/css/my-forms.css">
+
+<div class="my-form-wrap">
+
+	<div class="my-form__info-block">
+		<div class="info-block__item">
+			Автор сообщения:
+			<a asp-action="AboutUser" asp-controller="Forum" asp-route-id="@Model.AuthorId">@Model.AuthorUserName</a>
+		</div>
+		<div class="info-block__item">
+			Тема сообщения:
+			<a asp-action="ThemeByMessage" asp-controller="Forum" asp-route-themeId="@Model.ThemeId" asp-route-messageId="@Model.Id">@Model.ThemeTitle</a>
+		</div>
+		<div class="info-block__item">
+			Время написания: @Model.CreatingTime			
+		</div>
+	</div>
+
+	<form asp-action="SaveMessage" asp-controller="Forum" asp-antiforgery="true" asp-route-id="@Model.Id" method="post">
+		<div class="my-form-group">
+			<div asp-validation-summary="ModelOnly" class="validation text-danger"></div>
+		</div>		
+		<div class="my-form-group">
+			<label asp-for="Text" class="my-form-label">Текст сообщения:</label>
+			<textarea asp-for="Text" class="my-form-textarea my-textarea-big"></textarea>
+			<span asp-validation-for="Text" class="my-validation-span text-danger"></span>
+		</div>		
+		<div class="my-form-group">
+			<input type="hidden" asp-for="CreatingTime" />
+			<input type="hidden" asp-for="AuthorId" />
+			<input type="hidden" asp-for="AuthorUserName" />
+			<input type="hidden" asp-for="ThemeId" />
+			<input type="hidden" asp-for="ThemeTitle" />			
+			<input type="submit" class="btn btn-success" value="Сохранить изменения">
+		</div>
+
+	</form>
+
+</div>

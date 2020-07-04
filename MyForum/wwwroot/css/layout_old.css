@@ -1,0 +1,130 @@
+body {
+  background: url(../images/body-bg.jpg) no-repeat center;
+  background-size: cover;
+  background-attachment: fixed;
+  padding: 50px 5px;
+}
+
+.clearfix:after {
+  content: " ";
+  clear: both;
+  display: table;
+}
+
+.content {
+  padding: 10px;
+  background-color: rgba(3, 140, 219, 0.63);
+  min-width: 600px;
+}
+
+.my-container {
+  max-width: 1920px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  font-family: Verdana, sans-serif;
+  font-size: 17px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.header .header-table {
+  width: 100%;
+  height: 40px;
+  background: linear-gradient(to bottom, #2b4d8d, #4d70af);
+}
+
+.header .header-table .header-tr .header-td {
+  color: #fff;
+  vertical-align: middle;
+  padding: 5px 5px;
+}
+
+.header .header-table .header-tr .header-td a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.header .header-table .header-tr .header-td a:hover {
+  text-decoration: underline;
+}
+
+.header .header-table .header-tr .header-td.account-links {
+  padding: 0;
+  float: right;
+  width: 100%;
+}
+
+.header .header-table .header-tr .header-td.account-links .header__register-or-login {
+  padding: 5px;
+}
+
+.header .header-table .header-tr .header-td.account-links a {
+  color: #0404ac;
+  text-decoration: underline;
+}
+
+.header .header-table .header-tr .header-td .header__account-blog {
+  cursor: pointer;
+  padding: 5px;
+  position: relative;
+}
+
+.header .header-table .header-tr .header-td .header__account-blog:hover {
+  background-color: #2b4d8d;
+}
+
+.header .header-table .header-tr .header-td .header__account-blog .account-blog__photo {
+  display: block;
+  max-height: 32px;
+  float: left;
+  padding-right: 10px;
+}
+
+.header .header-table .header-tr .header-td .header__account-blog .account-blog__username {
+  display: inline;
+  vertical-align: middle;
+}
+
+.header .header-table .header-tr .header-td .header__account-blog .account-blog-menu__submenu {
+  background-color: #2b4d8d;
+  cursor: auto;
+  position: absolute;
+  z-index: 999;
+  top: 100%;
+  right: 0;
+  width: 100%;
+}
+
+.header .header-table .header-tr .header-td .header__account-blog .account-blog-menu__submenu .account-blog-menu__submenu__ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.header .header-table .header-tr .header-td .header__account-blog .account-blog-menu__submenu .account-blog-menu__submenu__ul li {
+  padding: 5px;
+}
+
+.header .header-table .header-tr .header-td .header__account-blog .account-blog-menu__submenu .account-blog-menu__submenu__ul li .li__link {
+  color: #fff;
+}
+
+.footer {
+  font-family: Verdana, sans-serif;
+  font-size: 12px;
+  margin-top: 20px;
+}
+
+.footer .statistics-table tr .top-th {
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.footer .statistics-table tr .top-td {
+  width: 33%;
+}

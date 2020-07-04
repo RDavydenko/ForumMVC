@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - Форум</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+	<link href="~/css/layout.css" rel="stylesheet" />
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+</head>
+<body>
+	<div class="my-container">
+		<header class="header">
+			<div class="content">
+				<table class="header-table">
+					<tr class="header-tr">
+						<td class="header-td"><a asp-action="Index" asp-controller="Forum"><img src="~/images/icon-home.png" alt=""></a></td>
+						<td class="header-td"><a asp-action="Index" asp-controller="Forum">Главная</a></td>
+						<td class="header-td"><a asp-action="Information" asp-controller="Forum">Информация о форуме</a></td>
+						<td class="header-td"><a asp-action="Feedback" asp-controller="Forum">Обратная связь</a></td>
+						<td class="header-td account-links">
+							@if (!User.Identity.IsAuthenticated)
+							{
+								<div class="header__register-or-login">
+									<a asp-action="Register" asp-controller="Account">Зарегистрироваться</a> или <a asp-action="Login" asp-controller="Account">войти</a>
+								</div>
+							}
+							else
+							{
+								<div id="account-blog-menu" class="header__account-blog clearfix">
+									<div class="account-blog__inner">
+										<img class="account-blog__photo" src="~/images/icon-user-no-photo.png" alt="" />
+										<p class="account-blog__username">@User.Identity.Name</p>
+										<div id="account-blog-menu__submenu" style="display: none;" class="account-blog-menu__submenu">
+											<ul class="account-blog-menu__submenu__ul">
+												<li><a class="li__link" asp-action="AboutUser" asp-controller="Forum">Профиль</a></li>
+												@if (User.IsInRole("admin"))
+												{
+													<li><a class="li__link" asp-action="AdminPanel" asp-controller="Forum">Админ-панель</a></li>
+												}
+												<li><a class="li__link" asp-action="Logout" asp-controller="Account">Выйти</a></li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							}
+						</td>
+					</tr>
+				</table>
+			</div>
+		</header>
+
+		@RenderBody()
+
+	</div>
+
+
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/header-menu.js" asp-append-version="true"></script>
+	@RenderSection("Scripts", required: false)
+</body>
+</html>

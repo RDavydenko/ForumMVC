@@ -1,0 +1,19 @@
+﻿@model MyForum.ViewModels.AdminPanel.CreateRoleAdminPanelViewModel
+@{
+   ViewData["Title"] = "Создание роли";
+
+   <link rel="stylesheet" href="~/css/my-forms.css">
+}
+<div class="my-form-wrap" style="max-width: 800px; margin: 0 auto;">
+   <form asp-action="CreateRole" asp-controller="Forum" asp-antiforgery="true" method="post">
+      <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+      <div class="my-form-group">
+         <label asp-for="Name" class="my-form-label">Название:</label>
+         <input asp-for="Name" />
+         <span asp-validation-for="Name" class="text-danger"></span>
+      </div>      
+      <div class="my-form-group">         
+         <input type="submit" class="btn btn-success" value="Создать">
+      </div>
+   </form>
+</div>

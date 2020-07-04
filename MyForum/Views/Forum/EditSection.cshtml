@@ -1,0 +1,191 @@
+﻿@model MyForum.ViewModels.EditSectionViewModel
+@{
+	ViewData["Title"] = "Редактирование раздела";
+	var themes = ViewBag.Themes as IEnumerable<MyForum.ViewModels.Edit.ThemeEditViewModel>;
+	var categories = ViewBag.Categories as IEnumerable<MyForum.ViewModels.Edit.CategoryEditViewModel>;
+}
+
+<link rel="stylesheet" href="~/css/my-forms.css">
+<style>
+	.gray {
+		color: gray;
+	}
+</style>
+
+<div class="my-form-wrap">
+	<div id="popup-block"></div>
+
+	<div class="my-form-group">
+		<label asp-for="Title" class="my-form-label">Название:</label>
+		<textarea id="title-textarea" class="my-form-textarea my-textarea-small">@Model.Title</textarea>
+		<span id="validation-span-for-title" class="my-validation-span text-danger"></span>
+	</div>
+	<div class="my-form-group">
+		<label asp-for="Description" class="my-form-label">Описание:</label>
+      <textarea id="description-textarea" class="my-form-textarea my-textarea-big">@Model.Description</textarea>
+		<span id="validation-span-for-description" class="my-validation-span text-danger"></span>
+	</div>
+	<div class="my-form-group">
+		<label asp-for="IsHidden" class="my-form-label">Скрыта? :</label>
+		<input id="is-hidden-checkbox" asp-for="IsHidden" class="my-form-checkbox" type="checkbox" />
+		<span asp-validation-for="IsHidden" class="my-validation-span text-danger"></span>
+	</div>
+	<div class="my-form__info-block">
+		@Html.AntiForgeryToken()
+		<div class="info-block__item"></div>
+	</div>
+
+	<button id="themes-btn" class="btn btn-dark">Принадлежащие темы:</button>
+	<button id="categories-btn" class="btn btn-outline-dark">В каких категориях состоит:</button>
+	<div id="themes-field" style="display:block">
+		<table class="table">
+			<tr>
+				<th>Входит?</th>
+				<th>Название темы:</th>
+				<th>Описание</th>
+			</tr>
+			@foreach (var t in themes)
+			{
+				<tr>
+					<td>
+						@if (t.Sections.Any(s => s.SectionId == Model.Id))
+						{
+							<input name="themeId" value="@t.Id" class="my-form-checkbox form-control" type="checkbox" checked="checked" />
+						}
+						else
+						{
+							<input name="themeId" value="@t.Id" class="my-form-checkbox form-control" type="checkbox" />
+						}
+					</td>
+					@{
+						var popupAboutHidden = "";
+						if (t.IsHidden)
+							popupAboutHidden = " (Скрытая тема)";
+					}
+					<td><a asp-action="Theme" asp-controller="Forum" asp-route-id="@t.Id">@t.Title<span class="gray">@popupAboutHidden</span></a></td>
+					<td>@t.Description</td>
+				</tr>
+			}
+		</table>
+	</div>
+	<div id="categories-field" style="display:none">
+		<table class="table">
+			<tr>
+				<th>Состоит?</th>
+				<th>Название категории:</th>
+			</tr>
+			@foreach (var c in categories)
+			{
+				<tr>
+					<td>
+						@if (c.Sections.Any(s => s.SectionId == Model.Id))
+						{
+							<input name="categoryId" value="@c.Id" class="my-form-checkbox form-control" type="radio" checked="checked" />
+						}
+						else
+						{
+							<input name="categoryId" value="@c.Id" class="my-form-checkbox form-control" type="radio" />
+						}
+					</td>
+					@{
+						var popupAboutHidden2 = "";
+						if (c.IsHidden)
+							popupAboutHidden2 = " (Скрытая категория)";
+					}
+					<td><a asp-action="Category" asp-controller="Forum" asp-route-id="@c.Id">@c.Title<span class="gray">@popupAboutHidden2</span></a></td>
+				</tr>
+			}
+		</table>
+	</div>
+
+	<script>
+		$(document).ready(() => {
+			$('#themes-btn').click(() => {
+				$('#themes-btn').removeClass('btn-outline-dark');
+				$('#categories-btn').removeClass('btn-dark');
+				$('#categories-btn').addClass('btn-outline-dark');
+				$('#themes-btn').addClass('btn-dark');
+
+				document.getElementById('categories-field').style.display = 'none';
+				document.getElementById('themes-field').style.display = 'block';
+
+			});
+			$('#categories-btn').click(() => {
+				$('#categories-btn').removeClass('btn-outline-dark');
+				$('#themes-btn').removeClass('btn-dark');
+				$('#themes-btn').addClass('btn-outline-dark');
+				$('#categories-btn').addClass('btn-dark');
+
+				document.getElementById('themes-field').style.display = 'none';
+				document.getElementById('categories-field').style.display = 'block';
+			});
+		});
+	</script>
+
+	<div class="my-form-group">
+		<input id="save-btn" type="button" class="btn btn-success" value="Сохранить изменения">
+		<script>
+				$(document).ready(() => {
+					$('#save-btn').click(() => {
+						$('#validation-span-for-title').text('');
+						$('#validation-span-for-description').text('');
+						if ($('#title-textarea').val().trim().length < 3 || $('#title-textarea').val().trim().length > 100) {
+							$('#validation-span-for-title').text('Допустимая длина - от 3 до 100 символов');
+						}
+						else if ($('#description-textarea').val().trim().length < 3 || $('#description-textarea').val().trim().length > 500) {
+							$('#validation-span-for-description').text('Допустимая длина - от 3 до 500 символов');
+						}
+						else {
+							var themesInputs = document.getElementsByName('themeId');
+							var categoriesInputs = document.getElementsByName('categoryId');
+							var activeThemeInputs = [];
+							var activeCategoryInput;
+							var token = $('input[name="__RequestVerificationToken"]').val();
+							themesInputs.forEach((item) => {
+								if (item.checked) {
+									activeThemeInputs.push(item.value);
+								}
+							});
+							categoriesInputs.forEach((item) => {
+								if (item.checked) {
+									activeCategoryInput = item.value;
+								}
+							});
+							var isHidden = document.getElementById('is-hidden-checkbox').checked;
+
+							$.ajax({
+								url: '/Forum/SaveSection',
+								type: 'POST',
+								data: {
+									id: '@Model.Id',
+									title: $('#title-textarea').val().trim(),
+									description: $('#description-textarea').val().trim(),
+									isHidden: isHidden,
+									themeIds: activeThemeInputs,
+									categoryId: activeCategoryInput,
+									__RequestVerificationToken: token
+								},
+								success: (result) => {
+									if (result.popups != null && result.popups != undefined) {
+										for (let i = 0; i < result.popups.length; i++) {                               
+											createPopup(result.popups[i].type, result.popups[i].text);
+										}
+									}
+								},
+								error: result => {
+									if (result.popups != null && result.popups != undefined) {
+										for (let i = 0; i < result.popups.length; i++) {                                
+											createPopup(result.popups[i].type, result.popups[i].text);
+										}
+									}
+								}
+							});
+						}
+					});
+				});
+		</script>
+	</div>
+
+</div>
+
+<script src="~/js/popup.js"></script>

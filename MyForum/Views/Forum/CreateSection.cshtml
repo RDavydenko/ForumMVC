@@ -1,0 +1,30 @@
+﻿@model MyForum.ViewModels.CreateSectionViewModel
+@{
+   ViewData["Title"] = "Создание раздела";
+}
+
+<link rel="stylesheet" href="~/css/my-forms.css">
+
+
+<div class="my-form-wrap">
+   <form asp-action="CreateSection" asp-controller="Forum" asp-antiforgery="true" method="post">
+      <div class="my-form-group">
+         <label asp-for="Title" class="my-form-label">Название:</label>
+         <textarea id="title-textarea" asp-for="Title" class="my-form-textarea my-textarea-small"></textarea>
+         <span asp-validation-for="Title" class="my-validation-span text-danger"></span>
+      </div>
+      <div class="my-form-group">
+         <label asp-for="Description" class="my-form-label">Описание:</label>
+         <textarea id="description-textarea" asp-for="Description" class="my-form-textarea my-textarea-big"></textarea>
+         <span asp-validation-for="Description"  class="my-validation-span text-danger"></span>
+      </div>
+      <div class="my-form-group">
+         <label asp-for="IsHidden" class="my-form-label">Скрыт? :</label>
+         <input id="is-hidden-checkbox" asp-for="IsHidden" class="my-form-checkbox" type="checkbox" />
+         <span asp-validation-for="IsHidden" class="my-validation-span text-danger"></span>
+      </div>
+      <div class="my-form-group">
+         <input type="submit" class="btn btn-success" value="Создать раздел"/>
+      </div>
+   </form>
+</div>

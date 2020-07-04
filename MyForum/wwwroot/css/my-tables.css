@@ -1,0 +1,451 @@
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+}
+
+.clearfix:after {
+  content: " ";
+  clear: both;
+  display: table;
+}
+
+.center-wrap {
+  margin: 0 auto;
+  max-width: 1000px;
+}
+
+.message-actions-btn {
+  font-size: 11px;
+  border: none;
+  cursor: pointer;
+  float: right;
+  width: 16px;
+  height: 16px;
+}
+
+.my-table {
+  font-family: Verdana, sans-serif;
+  font-size: 11px;
+  border: 1px solid #0b198c;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.my-table a {
+  color: #22229c;
+}
+
+.my-table p {
+  margin: 0;
+}
+
+.my-table .table-headers,
+.my-table .category-td,
+.my-table .td-content {
+  border: 0.02px solid #d1d1e1;
+  padding: 7px;
+}
+
+.my-table .table-headers {
+  background: linear-gradient(to bottom, #334d80, #526793);
+  color: #fff;
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.my-table .td-content {
+  background-color: #f5f5ff;
+  font-family: Verdana, sans-serif;
+  font-size: 12px;
+}
+
+.my-table .td-content .content__title {
+  color: #22229c;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.my-table .td-content .content__description {
+  font-size: 11px;
+}
+
+.my-table .td-last-message .last-message {
+  font-size: 11px;
+  min-width: 220px;
+}
+
+@media screen and (max-width: 425px) {
+  .my-table .td-last-message .last-message {
+    min-width: 160px;
+  }
+}
+
+@media screen and (max-width: 375px) {
+  .my-table .td-last-message .last-message {
+    min-width: 100px;
+  }
+}
+
+.my-table .td-last-message .last-message .last-message__img {
+  float: left;
+  margin-right: 5px;
+}
+
+.my-table .td-last-message .last-message .last-message__text {
+  font-weight: bold;
+}
+
+.my-table .td-last-message .last-message .last-message__link .last-message__link-btn {
+  background: url(../images/icon-right-arrow.gif);
+  border: none;
+  cursor: pointer;
+  width: 12px;
+  height: 12px;
+  margin-left: 4px;
+  float: right;
+}
+
+.my-table .td-last-message .last-message .last-message__link .last-message__date {
+  float: right;
+}
+
+.my-table .td-last-message .last-message .last-message__link .last-message__date .time {
+  color: #6679b1;
+}
+
+.my-table .content__numbers {
+  font-size: 14px;
+}
+
+.my-table .content__numbers .content__numbers__inner {
+  text-align: center;
+}
+
+.my-table .category {
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+  border: none;
+  border-spacing: 0;
+  background: linear-gradient(to bottom, #4b6ca6, #788fb9);
+  width: 100%;
+}
+
+.my-table .category .category__title {
+  display: inline;
+  color: #fff;
+}
+
+.my-table .category a.category__title:hover {
+  color: #22229c;
+}
+
+.my-table .category .hide-category-btn {
+  border: none;
+  cursor: pointer;
+  float: right;
+  width: 16px;
+  height: 16px;
+}
+
+.my-table-5 .table-headers:first-child {
+  border-right: none;
+}
+
+.my-table-5 .table-headers:nth-child(2) {
+  text-align: left;
+  border-left: none;
+}
+
+.my-table-5 .td-content:first-child {
+  border-right: none;
+}
+
+.my-table-5 .td-content:nth-child(2) {
+  border-left: none;
+}
+
+.my-table-5 .td-content:nth-child(even) {
+  background-color: #f5f5ff;
+}
+
+.my-table-5 .td-content:nth-child(odd) {
+  background-color: #e1e4f2;
+}
+
+.my-table-5 .td-content:first-child {
+  background-color: #f5f5ff;
+}
+
+.my-table-5 .td-content.td-image-fixed {
+  max-width: 39px;
+}
+
+.my-table-3 .td-content {
+  padding: 0;
+}
+
+.my-table-3 .td-33perc {
+  width: 33%;
+  vertical-align: top;
+}
+
+.my-table-top {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.my-table-top tr:hover {
+  background: #e1e4f2;
+}
+
+.my-table-top .table-top__score {
+  background: #e1e4f2;
+  width: 5px;
+}
+
+.my-table-top .table-top__link {
+  font-size: 11px;
+  padding-left: 5px;
+}
+
+.my-table-top .table-top__numbers {
+  float: right;
+  margin-right: 5px;
+}
+
+.my-table-2 .table-headers {
+  text-align: left;
+}
+
+.my-table-2 .td-content:first-child {
+  width: 35px;
+  border-right: none;
+}
+
+.my-table-2 .td-content:nth-child(2) {
+  border-left: none;
+}
+
+.my-table-4 th:first-child {
+  border-right: none;
+}
+
+.my-table-4 th:nth-child(2) {
+  text-align: left;
+  border-left: none;
+}
+
+.my-table-4 tr .td-content .theme-author-link {
+  color: gray;
+  font-size: 11px;
+}
+
+.my-table-4 tr .td-content.td-last-message .last-message__text {
+  font-weight: 400;
+}
+
+.my-table-4 tr .td-content.td-image-fixed {
+  max-width: 39px;
+}
+
+.my-table-4 tr .td-content.td-image-fixed .section__img {
+  width: 32px;
+}
+
+.my-table-4 tr .td-content:first-child {
+  border-right: none;
+}
+
+.my-table-4 tr .td-content:nth-child(2) {
+  border-left: none;
+}
+
+.my-table-message {
+  background: linear-gradient(to bottom, #354f81, #506591);
+  margin-bottom: 5px;
+}
+
+.my-table-message .message-data .td-message-data {
+  padding: 7px;
+}
+
+.my-table-message .message-data .td-message-data .message-data__clock-img {
+  max-width: 12px;
+  margin-left: 5px;
+}
+
+.my-table-message .message-data .td-message-data .message-data__time {
+  color: #fff;
+  display: inline-block;
+}
+
+.my-table-message .tr-message .message-author {
+  background-color: #e1e4f2;
+  width: 150px;
+}
+
+.my-table-message .tr-message .message-author .about-author {
+  font-size: 11px;
+}
+
+.my-table-message .tr-message .message-author .about-author .about-author__username {
+  font-size: 18px;
+}
+
+.my-table-message .tr-message .message-author .about-author .about-author__status {
+  color: gray;
+}
+
+.my-table-message .tr-message .message-author .about-author .about-author__avatar {
+  padding: 5px 0;
+  margin: 0 auto;
+}
+
+.my-table-message .tr-message .message-author .about-author .about-author__avatar img {
+  max-width: 100px;
+}
+
+.my-table-message .tr-message .message-text {
+  vertical-align: top;
+}
+
+.my-table-message .tr-message .message-text .message-content .message-content__text-input {
+  resize: none;
+  overflow-x: hidden;
+  padding: 5px;
+  width: 100%;
+  height: 300px;
+}
+
+.my-table-message .tr-send-message .td-content {
+  background-color: #667a94;
+  color: #fff;
+}
+
+.my-table-message .tr-send-message .td-send-message {
+  background-color: #f5f5ff;
+  padding: 5px 10px;
+}
+
+.my-table-message .tr-send-message .td-send-message .send-message-btn {
+  cursor: pointer;
+  font-size: 15px;
+  padding: 5px;
+  width: 100%;
+}
+
+.my-table-message .tr-send-message .td-send-message .send-message-btn:hover {
+  background-color: #b5b6b8;
+  color: #fff;
+}
+
+.action-btn {
+  position: relative;
+}
+
+.action-btn .action-btn__actions {
+  background-color: #5c79ad;
+  z-index: 999;
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: fit-content;
+}
+
+.action-btn .action-btn__actions .action-btn__action {
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  padding: 5px;
+  display: block;
+}
+
+.action-btn .action-btn__actions .action-btn__action:hover {
+  text-decoration: underline;
+}
+
+.page-navigation {
+  margin: 0 0 50px 0;
+}
+
+.page-navigation .page-navigation__inner {
+  float: right;
+}
+
+.page-navigation .page-navigation__inner .page-navigation__title {
+  background-color: #738fbf;
+  color: #fff;
+  border: 1px solid #000;
+  display: inline;
+  padding: 1px 4px;
+  margin: 0;
+}
+
+.page-navigation .page-navigation__inner .page-navigation__item {
+  color: #551a8b;
+  border: 1px solid #000;
+  background-color: #f5f5ff;
+  text-decoration: none;
+  padding: 1px 4px;
+  margin: 0;
+}
+
+.page-navigation .page-navigation__inner .page-navigation__item.page-navigation__item_active {
+  color: #000;
+  font-weight: bold;
+  background-color: #e1e4f2;
+}
+
+.center-wrap {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.center-wrap .form-group.title .create-theme__title-label {
+  float: left;
+  margin-right: 10px;
+}
+
+.center-wrap .form-group.title .create-theme__title-textarea {
+  overflow-x: hidden;
+  resize: none;
+  float: left;
+  margin-right: 10px;
+  width: 70%;
+  min-height: 100px;
+}
+
+.center-wrap .form-group.description .create-theme__description-label {
+  float: left;
+  margin-right: 10px;
+}
+
+.center-wrap .form-group.description .create-theme__description-textarea {
+  overflow-x: hidden;
+  resize: none;
+  float: left;
+  margin-right: 10px;
+  width: 70%;
+  min-height: 500px;
+}
+
+.center-wrap .form-group.choose-section .create-theme__choose-section-label {
+  margin-right: 15px;
+}
+
+.center-wrap .form-group.choose-section .choose-section__select {
+  width: 80%;
+}
+
+.center-wrap .form-group .create-theme__btn {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin: 0 auto;
+  width: 100%;
+}

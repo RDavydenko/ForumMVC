@@ -1,0 +1,24 @@
+﻿@model MyForum.ViewModels.CreateCategoryViewModel
+@{
+   ViewData["Title"] = "Создание категории";
+}
+
+<link rel="stylesheet" href="~/css/my-forms.css">
+
+<div class="my-form-wrap">
+   <form asp-action="CreateCategory" asp-controller="Forum" asp-antiforgery="true" method="post">
+      <div class="my-form-group">
+         <label asp-for="Title" class="my-form-label">Название:</label>
+         <textarea asp-for="Title" class="my-form-textarea my-textarea-small"></textarea>
+         <span asp-validation-for="Title" class="my-validation-span text-danger"></span>
+      </div>
+      <div class="my-form-group">
+         <label asp-for="IsHidden" class="my-form-label">Скрыта? :</label>
+         <input asp-for="IsHidden" class="my-form-checkbox" type="checkbox" />
+         <span asp-validation-for="IsHidden" class="my-validation-span text-danger"></span>
+      </div>
+      <div class="my-form-group">         
+         <input type="submit" class="btn btn-success" value="Создать категорию" />         
+      </div>
+   </form>
+</div>

@@ -1,0 +1,82 @@
+﻿@{
+	var viewModel = ViewBag.FooterViewModel as MyForum.ViewModels.FooterViewModel;
+	int i;
+}
+<footer class="footer">
+	<table class="my-table my-table-3">
+		<!-- Название категории  -->
+		<tr class="category">
+			<td class="category-td" colspan="3">
+				<div class="category__title">Статистика и рекорды форума</div>
+				<button class="hide-category-btn"></button>
+			</td>
+		</tr>
+		<!-- Секция (раздел) -->
+		<tr>
+			<th class="table-headers">Самые обсуждаемые темы</th>
+			<th class="table-headers">Наиболее популярные разделы</th>
+			<th class="table-headers">Самые выдающиеся пользователи</th>
+		</tr>
+		<tr>
+			<td class="td-content td-33perc">
+				<!-- Топ-темы -->
+				<table class="my-table-top">
+					@{i = 1; }
+					@foreach (var theme in viewModel.Themes)
+					{
+						<tr>
+							<td class="table-top__score">@i</td>
+							<td class="table-top__link"><a asp-action="Theme" asp-controller="Forum" asp-route-id="@theme.Id">@theme.Title</a></td>
+							<td class="table-top__numbers" title="Сообщений">@theme.MessagesCount</td>
+						</tr>
+						i++;
+					}
+				</table>
+			</td>
+			<td class="td-content td-33perc">
+				<!-- Топ-разделы -->
+				<table class="my-table-top">
+					@{i = 1; }
+					@foreach (var sect in viewModel.Sections)
+					{
+						<tr>
+							<td class="table-top__score">@i</td>
+							<td class="table-top__link"><a asp-action="Section" asp-controller="Forum" asp-route-id="@sect.Id">@sect.Title</a></td>
+							<td class="table-top__numbers" title="Тем">@sect.ThemesCount</td>
+						</tr>
+						i++;
+					}
+				</table>
+			</td>
+			<td class="td-content td-33perc">
+				<!-- Топ-пользователи -->
+				<table class="my-table-top">
+					@{i = 1; }
+					@foreach (var user in viewModel.Authors)
+					{
+						<tr>
+							<td class="table-top__score">@i</td>
+							<td class="table-top__link"><a asp-action="AboutUser" asp-controller="Forum" asp-route-id="@user.Id">@user.UserName</a></td>
+							<td class="table-top__numbers" title="Сообщений">@user.MessagesCount</td>
+						</tr>
+						i++;
+					}
+
+				</table>
+			</td>
+		</tr>
+	</table>
+	<table class="my-table my-table-2">
+		<tr>
+			<th colspan="2" class="table-headers">Статистика форума</th>
+		</tr>
+		<tr>
+			<td class="td-content"><img src="~/images/gif-stats.gif" alt=""></td>
+			<td class="td-content">
+				<div class="content__description">
+					Тем: @viewModel.ThemesCount, Сообщений: @viewModel.MessagesCount, Пользователей: @viewModel.UsersCount
+				</div>
+			</td>
+		</tr>
+	</table>
+</footer>

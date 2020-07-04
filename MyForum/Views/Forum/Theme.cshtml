@@ -1,0 +1,464 @@
+﻿@model MyForum.ViewModels.SendMessageViewModel
+@{
+	ViewData["Title"] = "Тема";
+}
+<link href="~/css/my-tables.css" rel="stylesheet" />
+@{
+	var messages = ViewBag.Messages as IEnumerable<Message>;
+	var user = ViewBag.User as MyForum.Models.User;
+	var currentPage = ViewBag.CurrentPage as int?;
+	var maxPage = ViewBag.MaxPage as int?;
+	var themeId = Context.Request.Query["id"];
+	var isThemeClosed = ViewBag.IsThemeClosed as bool?;
+	var isHidden = ViewBag.IsHidden as bool?;
+
+	int startPage, runCount;
+	int magicNumber = 3;
+	int pagesCount = magicNumber * 2 + 1; // Макисимальное отображаемое количество страниц
+}
+
+@if (isHidden.Value)
+{
+	<div class="alert alert-secondary">Эта тема <strong>скрыта</strong> от пользователей. Доступ только для модераторов и администраторов</div>
+}
+@if (isThemeClosed.Value)
+{
+	<div class="alert alert-primary"><strong>Тема закрыта</strong></div>
+}
+
+@{ /* Постраничный навигатор (верхний) */}
+<div class="page-navigation clearfix" style="margin-bottom: 10px">
+	<div class="page-navigation__inner">
+		<div class="page-navigation__title">Страница @currentPage.ToString() из @maxPage.ToString()</div>
+		@{
+			if (currentPage.Value > magicNumber + 1)
+			{
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="1" class="page-navigation__item">&laquo; Первая</a>
+			}
+			if (currentPage.Value > 1)
+			{
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="@(currentPage - 1)" class="page-navigation__item">&lt;</a>
+			}
+
+			startPage = currentPage.Value - magicNumber;
+			if (startPage <= 0)
+				startPage = 1;
+			else if (currentPage.Value + magicNumber > maxPage.Value)
+			{
+				startPage = maxPage.Value - (pagesCount - 1);
+				startPage = startPage <= 0 ? 1 : startPage;
+			}
+
+			runCount = 0;
+			for (int i = startPage; runCount < pagesCount && runCount < maxPage; i++, runCount++)
+			{
+
+				if (i == currentPage)
+				{
+					<a class="page-navigation__item page-navigation__item_active">@i</a>
+					continue;
+				}
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="@i" class="page-navigation__item">@i</a>
+			}
+
+			if (currentPage.Value < maxPage.Value)
+			{
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="@(currentPage + 1)" class="page-navigation__item">&gt;</a>
+			}
+			if (currentPage.Value < maxPage.Value - magicNumber)
+			{
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="@maxPage" class="page-navigation__item">Последняя &raquo;</a>
+			}
+		}
+	</div>
+</div>
+
+@foreach (var m in messages)
+{
+	<table id="@("message-" + m.Id)" class="my-table my-table-message">
+		<tr class="message-data">
+			<td class="td-message-data" colspan="2">
+				<img src="~/images/icon-clock.png" alt="" class="message-data__clock-img">
+				<div class="message-data__time">@m.CreatingTime.ToString("dd.MM.yyyy, HH:mm")</div>
+				<button class="message-actions-btn action-btn">
+					<div class="action-btn__actions">
+						<a asp-action="OneMessage" asp-controller="Forum" asp-route-id="@(m.Id.ToString())" target="_blank" class="action-btn__action">Просмотр сообщения</a>
+						<div id="@("yakor-link-" + m.Id.ToString())" class="action-btn__action">Копировать якорную ссылку</div>
+						@{
+							// Получение якорной ссылки
+						}
+						<script>
+							$(document).ready(function() {
+								$('@("#yakor-link-" + m.Id.ToString())').click(function (e) {
+									$.ajax({
+										url: '/Forum/YakorLink',
+										type: 'GET',
+										data: { messageId: '@m.Id', themeId: '@m.Theme.Id' },
+										success: function (result) {
+											prompt('Якорная ссылка на сообщение:', result);
+										},
+										error: function () {
+											alert('Возникла ошибка');
+										}
+									});
+								});
+							});
+						</script>
+						@if (User.Identity.IsAuthenticated)
+						{
+							<div id="@("report-message-" + m.Id.ToString())" class="action-btn__action">Пожаловаться</div>
+
+							// Отправка жалобы на сообщение
+							<script>
+							$(document).ready(function() {
+								$('@("#report-message-" + m.Id.ToString())').click(function (e) {
+									let text = prompt('Опишите причину жалобы:');
+									if (text != null && text != '') {
+										$.ajax({
+											url: '/Forum/Report',
+											type: 'POST',
+											data: { id: '@m.Id',objectType:'message', text: text },
+											success: function () {
+												alert('Жалоба отправлена');
+											},
+											error: function () {
+												alert('Возникла ошибка при отправке жалобы');
+											}
+										});
+									}
+								});
+							});
+							</script>
+						}
+						@if (User.IsInRole("moder") || User.IsInRole("admin"))
+						{
+							@if (!m.Author.IsSilenced)
+							{
+								<div id="@("silence-" + m.Id.ToString())" class="action-btn__action">Заморозить пользователя</div>
+								// Заморозить пользователя
+								<script>
+								$(document).ready(function() {
+									$('@("#silence-" + m.Id.ToString())').click(function (e) {
+										let minutes = prompt('На сколько минут заблокировать пользователя?\n60 - час\n1440 - день\n10080 - неделя\n43200 - месяц (30 дней)');
+										if (minutes <= 0) {
+											return;
+										}
+										$.ajax({
+											url: '/Forum/SilenceUser',
+											type: 'POST',
+											data: { id: '@m.Author.Id', minutes: minutes},
+											success: function () {
+												alert('Пользователь заморожен');
+												location.reload();
+											},
+											error: function () {
+												alert('Произошла ошибка');
+											}
+										});
+									});
+								});
+								</script>
+							}
+							else if (m.Author.IsSilenced)
+							{
+								<div id="@("unsilence-" + m.Id.ToString())" class="action-btn__action">Разморозить пользователя</div>
+								// Разморозить пользователя
+								<script>
+								$('@("#unsilence-" + m.Id.ToString())').click(function (e) {
+									$.ajax({
+										url: '/Forum/UnsilenceUser',
+										type: 'POST',
+										data: { id: '@m.Author.Id' },
+										success: function () {
+											alert('Пользователь разморожен');
+											location.reload();
+										},
+										error: function () {
+											alert('Произошла ошибка');
+										}
+									});
+								});
+								</script>
+							}
+
+							// Редактировать сообщение
+							<a asp-action="Edit" asp-controller="Forum" asp-route-id="@m.Id" asp-route-objectType="message" class="action-btn__action">Редактировать</a>
+
+							<div id="@("delete-message-" + m.Id.ToString())" class="action-btn__action">Удалить</div>
+
+							// Удалить сообщение
+							<script>
+							$(document).ready(function() {
+								$('@("#delete-message-" + m.Id.ToString())').click(function (e) {
+									$.ajax({
+										url: '/Forum/DeleteMessage',
+										type: 'POST',
+										data: { id: '@m.Id' },
+										success: function () {
+											alert('Сообщение удалено');
+											location.reload();
+										},
+										error: function () {
+											alert('Возникла ошибка при удалении сообщения');
+										}
+									});
+								});
+							});
+							</script>
+
+						}
+					</div>
+				</button>
+			</td>
+		</tr>
+		<tr class="tr-message">
+			<td class="td-content message-author">
+				<div class="about-author">
+					<a asp-action="AboutUser" asp-controller="Forum" asp-route-id="@m.Author.Id" class="about-author__username">@m.Author.UserName</a>
+					<div class="about-author__status">@m.Author.Status</div>
+					<div class="about-author__avatar"><img src="~/images/icon-user-no-photo.png" alt=""></div>
+					<div class="about-author__registration-date">Регистрация: @m.Author.RegistrationDate.ToString("dd.MM.yyyy")</div>
+					<div class="about-author__count-of-messages">Сообщений: @m.Author.Messages.Count</div>
+				</div>
+			</td>
+			<td class="td-content message-text">
+				<div class="message-content">
+					<div class="message-content__text">
+						@m.Text
+					</div>
+				</div>
+			</td>
+		</tr>
+	</table>
+}
+
+@{ /* Постраничный навигатор (нижний) */}
+<div class="page-navigation clearfix" style="margin-bottom: 0px">
+	<div class="page-navigation__inner">
+		<div class="page-navigation__title">Страница @currentPage.ToString() из @maxPage.ToString()</div>
+		@{
+			if (currentPage.Value > magicNumber + 1)
+			{
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="1" class="page-navigation__item">&laquo; Первая</a>
+			}
+			if (currentPage.Value > 1)
+			{
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="@(currentPage - 1)" class="page-navigation__item">&lt;</a>
+			}
+
+			startPage = currentPage.Value - magicNumber;
+			if (startPage <= 0)
+				startPage = 1;
+			else if (currentPage.Value + magicNumber > maxPage.Value)
+			{
+				startPage = maxPage.Value - (pagesCount - 1);
+				startPage = startPage <= 0 ? 1 : startPage;
+			}
+
+			runCount = 0;
+			for (int i = startPage; runCount < pagesCount && runCount < maxPage; i++, runCount++)
+			{
+
+				if (i == currentPage)
+				{
+					<a class="page-navigation__item page-navigation__item_active">@i</a>
+					continue;
+				}
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="@i" class="page-navigation__item">@i</a>
+			}
+
+			if (currentPage.Value < maxPage.Value)
+			{
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="@(currentPage + 1)" class="page-navigation__item">&gt;</a>
+			}
+			if (currentPage.Value < maxPage.Value - magicNumber)
+			{
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@themeId" asp-route-page="@maxPage" class="page-navigation__item">Последняя &raquo;</a>
+			}
+		}
+	</div>
+</div>
+
+@{ /* Действия над темой */}
+@if (User.IsInRole("admin") || User.IsInRole("moder"))
+{
+	@if (!isThemeClosed.Value)
+	{
+		<button id="close-theme" class="btn btn-warning">Закрыть тему</button>
+		// Закрыть тему
+		<script>
+		$(document).ready(function() {
+			$('#close-theme').click(function (e) {
+				let confirmDelete = confirm('Закрыть эту тему?');
+				if (confirmDelete) {
+					$.ajax({
+						url: '/Forum/CloseTheme',
+						type: 'POST',
+						data: { id: '@themeId' },
+						success: function () {
+							alert('Тема закрыта');
+							location.reload();
+						},
+						error: function () {
+							alert('Возникла ошибка при закрытии темы');
+						}
+					});
+				}
+			});
+		});
+		</script>
+	}
+	else
+	{
+		<button id="open-theme" class="btn btn-success">Открыть тему</button>
+		// Открыть тему
+		<script>
+		$(document).ready(function() {
+			$('#open-theme').click(function (e) {
+				let confirmDelete = confirm('Заново открыть тему?');
+				if (confirmDelete) {
+					$.ajax({
+						url: '/Forum/OpenTheme',
+						type: 'POST',
+						data: { id: '@themeId' },
+						success: function () {
+							alert('Тема открыта');
+							location.reload();
+						},
+						error: function () {
+							alert('Возникла ошибка при открытии темы');
+						}
+					});
+				}
+			});
+		});
+		</script>
+	}
+
+	@if (!isHidden.Value)
+	{
+		<button id="hide-theme" class="btn btn-secondary">Скрыть тему</button>
+		// Скрыть тему
+		<script>
+			$(document).ready(function() {
+				$('#hide-theme').click(function (e) {
+					let confirmDelete = confirm('Вы уверены, что хотите скрыть тему? (Сообщения скрыты/удалены не будут)');
+					if (confirmDelete) {
+						$.ajax({
+							url: '/Forum/Hide',
+							type: 'POST',
+							data: { id: '@themeId', objectType: 'theme' },
+							success: function () {
+								alert('Тема скрыта');
+								location.reload();
+							},
+							error: function () {
+								alert('Возникла ошибка при скрытии темы');
+							}
+						});
+					}
+				});
+			});
+		</script>
+	}
+	else
+	{
+		<button id="unhide-theme" class="btn btn-secondary">Показать тему</button>
+		// Показать тему
+		<script>
+			$(document).ready(function() {
+				$('#unhide-theme').click(function (e) {
+					let confirmDelete = confirm('Вы уверены, что хотите показать тему?');
+					if (confirmDelete) {
+						$.ajax({
+							url: '/Forum/Unhide',
+							type: 'POST',
+							data: { id: '@themeId', objectType: 'theme' },
+							success: function () {
+								alert('Тема показана');
+								location.reload();
+							},
+							error: function () {
+								alert('Возникла ошибка');
+							}
+						});
+					}
+				});
+			});
+		</script>
+	}
+	<button id="delete-theme" class="btn btn-danger">Удалить тему</button>
+	// Удалить тему
+	<script>
+		$(document).ready(function() {
+			$('#delete-theme').click(function (e) {
+				let confirmDelete = confirm('Вы уверены, что хотите удалить тему? (Сообщения БУДУТ удалены!)');
+				if (confirmDelete) {
+					$.ajax({
+						url: '/Forum/Delete',
+						type: 'POST',
+						data: { id: '@themeId', objectType: 'theme' },
+						success: function () {
+							alert('Тема удалена');
+							location.reload();
+						},
+						error: function () {
+							alert('Возникла ошибка при удалении темы');
+						}
+					});
+				}
+			});
+		});
+	</script>
+	// Редактировать тему
+	<a asp-action="Edit" asp-controller="Forum" asp-route-id="@themeId" asp-route-objectType="theme" class="btn btn-info">Редактировать тему</a>
+}
+
+@{ /* Поле отправки сообщения */}
+@if (User.Identity.IsAuthenticated && !user.IsSilenced && !isThemeClosed.Value)
+{
+	<table class="my-table my-table-message" style="margin-top:20px">
+		<tr><div class="validation text-danger"></div></tr>
+		<tr class="tr-send-message">
+			<td class="td-content">Отправить сообщение</td>
+		</tr>
+		<tr class="tr-message">
+			<td class="td-content message-text">
+				<div class="message-content">
+					<textarea id="textarea" class="message-content__text-input" placeholder="Текст сообщения..."></textarea>
+				</div>
+			</td>
+		</tr>
+		<tr class="tr-send-message">
+			<td class="td-send-message"><button type="submit" class="send-message-btn">Отправить</button></td>
+		</tr>
+	</table>
+	// Отправка сообщения
+	<script>
+		$(document).ready(function () {
+			$('button.send-message-btn').click(function () {
+				if ($('#textarea').val().trim().length < 3 || $('#textarea').val().trim().length > 1000) {
+					$('.validation.text-danger').text('Допустимая длина сообщения - от 3 до 1000 символов');
+				}
+				else {
+					$('.validation.text-danger').text('');
+					$.ajax({
+						url: '/Forum/SendMessage',
+						type: 'POST',
+						data: { text: $('#textarea').val(), themeId: '@Context.Request.Query["id"]' },
+						success: function() {
+							$('#textarea').val('');
+							location.reload();
+						},
+						error: function () {
+							alert('Произошла ошибка при отправке');
+						}
+
+					})
+				}
+			});
+		});
+	</script>
+}
+
+<script src="~/js/action-btn.js"></script>

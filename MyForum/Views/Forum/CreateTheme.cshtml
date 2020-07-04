@@ -1,0 +1,42 @@
+﻿@model MyForum.ViewModels.NewThemeViewModel
+@{
+	ViewData["Title"] = "Создание темы";
+}
+
+<link href="~/css/my-tables.css" rel="stylesheet" />
+
+<div class="center-wrap">
+	<table class="my-table my-table-message">
+		<tr>
+			<div class="text-danger validation"></div>
+		</tr>
+		<tr class="tr-send-message">
+			<td class="td-content">Создать тему</td>
+		</tr>
+	</table>
+	<form asp-action="CreateTheme" asp-controller="Forum" asp-antiforgery="true" method="post">
+		<div class="form-group title clearfix">
+			<label asp-for="Title" class="create-theme__title-label">Заголовок:</label>
+			<textarea asp-for="Title" class="create-theme__title-textarea"
+					  placeholder="Заголовок темы..."></textarea>
+			<span asp-validation-for="Title" class="text-danger create-theme__title-span"></span>
+		</div>
+		<div class="form-group description clearfix">
+			<label asp-for="Description" class="create-theme__description-label">Описание:</label>
+			<textarea asp-for="Description" class="create-theme__description-textarea" placeholder="Описание темы..."></textarea>
+			<span asp-validation-for="Description" class="text-danger create-theme__description-span"></span>
+		</div>
+		<div class="form-group choose-section" title="Выберите, к какому разделу относится тема">
+			<label class="create-theme__choose-section-label">Раздел: </label>
+			<select asp-for="SectionId" class="choose-section__select">
+				<option value="@Model?.SectionId" selected>@Model?.SectionTitle</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<button type="submit" class="btn btn-secondary create-theme__btn">Создать</button>
+		</div>
+	</form>
+</div>
+
+
+

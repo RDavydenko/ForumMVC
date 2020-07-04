@@ -1,0 +1,27 @@
+﻿@model MyForum.ViewModels.UserEditProfileViewModel
+@{
+	ViewData["Title"] = "Редактирование профиля";
+}
+<link href="~/css/edit-user.css" rel="stylesheet" />
+<div class="account-edit-block">
+	<div class="account-edit-block__inner clearfix">
+		<form asp-action="EditProfile" asp-controller="Forum" asp-antiforgery="true" method="post">
+			<div asp-validation-summary="ModelOnly" class="validation text-danger"></div>
+			<div name="validation-group" class="form-group">
+				<label asp-for="Login" class="form-group-label">Логин</label>
+				<input asp-for="Login" class="form-group-input" value="@Model.Login" />
+				<span asp-validation-for="Login" class="text-danger"></span>
+			</div>
+			<div name="validation-group" class="form-group">
+				<label asp-for="Status" class="form-group-label text-area-label">Статус</label>
+				<textarea asp-for="Status" class="form-group-input text-area-input">@Model.Status</textarea>
+				<span asp-validation-for="Status" class="text-danger"></span>
+			</div>
+         <div class="mb-1"><a asp-action="ChangePassword" asp-controller="Account" class="btn btn-sm btn-secondary">Сменить пароль</a></div>
+			<button type="submit" class="btn btn-success">Сохранить изменения</button>
+		</form>
+	</div>
+</div>
+
+<script src="~/js/account-validate-change-color.js"></script>
+

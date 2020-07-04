@@ -1,0 +1,48 @@
+.account-info-block {
+  font-family: Verdana, sans-serif;
+  width: 100%;
+}
+
+.account-info-block .account-info-block__inner {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 40px;
+  padding: 20px;
+  margin: 0 auto;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  min-width: 450px;
+}
+
+.account-info-block .account-info-block__inner .bold {
+  font-weight: bold;
+}
+
+.account-info-block .account-info-block__inner .account-info__username {
+  font-size: 26px;
+  font-weight: bold;
+  border-bottom: 1px solid gray;
+  margin-bottom: 5px;
+}
+
+.account-info-block .account-info-block__inner .account-info__photo {
+  float: left;
+}
+
+.account-info-block .account-info-block__inner .account-info__photo .profile-photo-img {
+  margin: 5px 10px 0px 0px;
+  max-height: 150px;
+  max-width: 150px;
+}
+
+.account-info-block .account-info-block__inner .account-info__status {
+  font-family: "Times New Roman", Times, serif;
+  font-style: italic;
+  font-size: 18px;
+  color: #636363;
+  margin-bottom: 5px;
+}
+
+.account-info-block .account-info-block__inner .account-info__activity {
+  margin-bottom: 5px;
+}

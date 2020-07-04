@@ -1,0 +1,33 @@
+﻿@model MyForum.Models.User
+@{
+	ViewData["Title"] = Model.UserName;
+}
+@{
+	int countOfThemes = ViewBag.CountOfThemes;
+	int countOfMessages = ViewBag.CountOfMessages;
+}
+<link href="~/css/about-user.css" rel="stylesheet" />
+
+<div class="account-info-block">
+	<div class="account-info-block__inner clearfix">
+		<div class="account-info__username">
+			@Model.UserName
+		</div>
+		<div class="account-info__photo">
+			<img class="profile-photo-img" src="~/images/icon-user-no-photo.png" alt="">
+		</div>
+		@if (Model.Status != null)
+		{
+		<div class="account-info__status">"@Model.Status"</div>
+		}
+		<div class="account-info__registration-date">Дата регистрации: <span class="bold">@Model.RegistrationDate.ToString("dd.MM.yyyy")</span></div>
+		<div class="account-info__activity">
+			<div class="activity__count-of-themes">Создано тем: <span class="bold">@countOfThemes</span></div>
+			<div class="activity__count-of-messages">Написано сообщений: <span class="bold">@countOfMessages</span></div>
+		</div>
+		@if (Model.UserName == User.Identity.Name)
+		{
+			<a asp-action="EditProfile" asp-controller="Forum" class="btn btn-primary">Редактировать</a>
+		}
+	</div>
+</div>

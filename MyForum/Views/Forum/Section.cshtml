@@ -1,0 +1,176 @@
+﻿@model MyForum.Models.Section
+@{
+	ViewData["Title"] = Model.Title;
+}
+<link href="~/css/my-tables.css" rel="stylesheet" />
+
+
+@if (Model.IsHidden)
+{
+	<div class="alert alert-secondary">Этот раздел <strong>скрыт</strong> от пользователей. Доступ только для модераторов и администраторов</div>
+}
+<a asp-action="CreateTheme" asp-controller="Forum" asp-route-sectionId="@Model.Id" class="btn btn-sm btn-primary" style="margin-bottom: 15px">Создать новую тему</a>
+
+<table class="my-table my-table-4">
+	<!-- Название раздела  -->
+	<tr class="category">
+		<td class="category-td" colspan="4">
+			<div class="category__title">@Model.Title</div>
+			<button class="message-actions-btn action-btn">
+				<div class="action-btn__actions">
+					@if (User.Identity.IsAuthenticated)
+					{
+						<div id="@("report-" + Model.Id)" class="action-btn__action">Пожаловаться</div>
+						// Отправка жалобы на раздел
+						<script>
+						$(document).ready(function() {
+							$('@("#report-" + Model.Id)').click(function (e) {
+								let text = prompt('Опишите причину жалобы:');
+								if (text != null && text != '') {
+									$.ajax({
+										url: '/Forum/Report',
+										type: 'POST',
+										data: { id: '@Model.Id', objectType:'section', text: text },
+										success: function () {
+											alert('Жалоба отправлена');
+										},
+										error: function () {
+											alert('Возникла ошибка при отправке жалобы');
+										}
+									});
+								}
+							});
+						});
+						</script>
+					}
+					@if (User.IsInRole("moder") || User.IsInRole("admin"))
+					{
+						@if (!Model.IsHidden)
+						{
+							<div id="@("hide-" + Model.Id)" class="action-btn__action">Скрыть раздел</div>
+							// Скрыть раздел
+							<script>
+									$(document).ready(function() {
+										$('@("#hide-" + Model.Id)').click(function (e) {
+											let confirmDelete = confirm('Вы уверены, что хотите скрыть раздел? (Темы скрыты не будут)');
+											if (confirmDelete) {
+												$.ajax({
+													url: '/Forum/Hide',
+													type: 'POST',
+													data: { id: '@Model.Id', objectType: 'section'},
+													success: function () {
+														alert('Раздел скрыт');
+														location.reload();
+													},
+													error: function () {
+														alert('Произошла ошибка');
+													}
+												});
+											}
+										});
+									});
+							</script>
+						}
+						else
+						{
+							<div id="@("unhide-" + Model.Id)" class="action-btn__action">Показать раздел</div>
+							// Показать раздел
+							<script>
+									$(document).ready(function() {
+										$('@("#unhide-" + Model.Id)').click(function (e) {
+											let confirmDelete = confirm('Вы уверены, что хотите показать раздел?');
+											if (confirmDelete) {
+												$.ajax({
+													url: '/Forum/Unhide',
+													type: 'POST',
+													data: { id: '@Model.Id', objectType: 'section'},
+													success: function () {
+														alert('Раздел показан');
+														location.reload();
+													},
+													error: function () {
+														alert('Произошла ошибка');
+													}
+												});
+											}
+										});
+									});
+							</script>
+						}
+
+						<div id="@("delete-" + Model.Id)" class="action-btn__action">Удалить раздел</div>
+						// Удалить раздел
+						<script>
+								$(document).ready(function() {
+									$('@("#delete-" + Model.Id)').click(function (e) {
+										let confirmDelete = confirm('Вы уверены, что хотите удалить раздел? (Темы удалены не будут)');
+										if (confirmDelete) {
+											$.ajax({
+												url: '/Forum/Delete',
+												type: 'POST',
+												data: { id: '@Model.Id', objectType: 'section'},
+												success: function () {
+													alert('Раздел удален');
+													location.reload();
+												},
+												error: function () {
+													alert('Произошла ошибка');
+												}
+											});
+										}
+									});
+								});
+						</script>
+
+						<a asp-action="Edit" asp-controller="Forum" asp-route-id="@Model.Id" asp-route-objectType="section" class="action-btn__action">Редактировать раздел</a>
+					}
+				</div>
+			</button>
+		</td>
+	</tr>
+</table>
+<table class="my-table my-table-4">
+	<tr>
+		<th class="table-headers"></th>
+		<th class="table-headers">Тема \ Автор</th>
+		<th class="table-headers">Cообщений</th>
+		<th class="table-headers">Последнее сообщение</th>
+	</tr>
+	<!-- Секция (раздел) -->
+	@{
+		var sortedThemes = Model.Themes.OrderByDescending(t => t.Theme.Messages.OrderByDescending(m => m.CreatingTime).FirstOrDefault().CreatingTime).ToList();
+	}
+	@foreach (var theme in sortedThemes)
+	{
+		var lastMessage = theme.Theme.Messages.OrderByDescending(m => m.CreatingTime).FirstOrDefault();
+		<tr>
+			<td class="td-content td-image-fixed"><img class="section__img" src="~/images/icon-paperclip.png" alt=""></td>
+			<td class="td-content">
+				<a asp-action="Theme" asp-controller="Forum" asp-route-id="@theme.Theme.Id" class="content__title">@theme.Theme.Title</a>
+				<p class="content__description">
+					@theme.Theme.Description
+				</p>
+				<a asp-action="AboutUser" asp-controller="Forum" asp-route-id="@theme.Theme.Author.Id" class="theme-author-link">@theme.Theme.Author.UserName</a>
+			</td>
+			<td class="content__numbers td-content">
+				<div class="content__numbers__inner">@theme.Theme.Messages.Count</div>
+			</td>
+			<td class="td-content td-last-message">
+				<div class="last-message">
+					@if (lastMessage != null)
+					{
+						<img src="~/images/icon-list.gif" alt="" class="last-message__img">
+						<p class="last-message__text">@lastMessage.Text</p>
+						<p class="last-message__author">от <a asp-action="AboutUser" asp-controller="Forum" asp-route-id="@lastMessage.Author.Id">@lastMessage.Author.UserName</a></p>
+						<div class="last-message__link">
+							<a title="К последнему сообщению" asp-action="ThemeByMessage" asp-controller="Forum" asp-route-themeId="@lastMessage.Theme.Id" asp-route-messageId="@lastMessage.Id" class="last-message__link-btn"></a>
+							<p class="last-message__date">@lastMessage.CreatingTime.ToString("dd.MM.yyyy") <span class="time">@lastMessage.CreatingTime.ToString("HH:mm")</span></p>
+						</div>
+					}
+				</div>
+			</td>
+		</tr>
+	}
+</table>
+
+<script src="~/js/action-btn.js"></script>

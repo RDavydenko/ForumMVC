@@ -1,0 +1,47 @@
+﻿@model MyForum.ViewModels.EditThemeViewModel
+@{
+	ViewData["Title"] = "Редактирование темы";
+}
+
+<link rel="stylesheet" href="~/css/my-forms.css">
+
+<div class="my-form-wrap">
+
+	<div class="my-form__info-block">
+		<div class="info-block__item">
+			Автор темы:
+			<a asp-action="AboutUser" asp-controller="Forum" asp-route-id="@Model.AuthorId">@Model.AuthorUserName</a>
+		</div>
+	</div>
+
+	<form asp-action="SaveTheme" asp-controller="Forum" asp-antiforgery="true" asp-route-id="@Model.Id" method="post">
+		<div class="my-form-group">
+			<label asp-for="Title" class="my-form-label">Заголовок:</label>
+			<textarea asp-for="Title" class="my-form-textarea my-textarea-small"></textarea>
+			<span asp-validation-for="Title" class="my-validation-span text-danger"></span>
+		</div>
+		<div class="my-form-group">
+			<label asp-for="Description" class="my-form-label">Описание:</label>
+			<textarea asp-for="Description" class="my-form-textarea my-textarea-big"></textarea>
+			<span asp-validation-for="Description" class="my-validation-span text-danger"></span>
+		</div>
+		<div class="my-form-group">
+			<label asp-for="IsClosed" class="my-form-label">Закрыта? :</label>
+			<input asp-for="IsClosed" class="my-form-checkbox" type="checkbox" />
+			<span asp-validation-for="IsClosed" class="my-validation-span text-danger"></span>
+		</div>
+		<div class="my-form-group">
+			<label asp-for="IsHidden" class="my-form-label">Скрыта? :</label>
+			<input asp-for="IsHidden" class="my-form-checkbox" type="checkbox" />
+			<span asp-validation-for="IsHidden" class="my-validation-span text-danger"></span>
+		</div>
+		<div class="my-form-group">
+			<input type="hidden" asp-for="AuthorId" />
+			<input type="hidden" asp-for="AuthorUserName" />
+			<input type="submit" class="btn btn-success" value="Сохранить изменения">
+		</div>
+
+	</form>
+
+</div>
+

@@ -1,0 +1,20 @@
+﻿@model MyForum.ViewModels.AdminPanel.RoleEditAdminPanelViewModel
+@{
+   ViewData["Title"] = "Редактирование роли " + Model.Name;
+
+   <link rel="stylesheet" href="~/css/my-forms.css">
+}
+<div class="my-form-wrap">
+   <form asp-action="EditRole" asp-controller="Forum" asp-antiforgery="true" method="post">
+      <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+      <div class="my-form-group">
+         <label asp-for="Name" class="my-form-label">Название:</label>
+         <input asp-for="Name" />
+         <span asp-validation-for="Name" class="text-danger"></span>
+      </div>      
+      <div class="my-form-group">
+         <input asp-for="Id" type="hidden" />
+         <input type="submit" class="btn btn-success" value="Сохранить изменения">
+      </div>
+   </form>
+</div>

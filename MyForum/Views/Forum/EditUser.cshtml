@@ -1,0 +1,40 @@
+﻿@model MyForum.ViewModels.AdminPanel.UserEditAdminPanelViewModel
+@{
+   ViewData["Title"] = "Редактирование пользователя " + Model.Login;
+
+   <link rel="stylesheet" href="~/css/my-forms.css">
+}
+<div class="my-form-wrap">
+   <form asp-action="EditUser" asp-controller="Forum" asp-antiforgery="true" method="post">
+      <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+      <div class="my-form-group">
+         <label asp-for="Login" class="my-form-label">Логин:</label>
+         <input asp-for="Login" readonly />
+      </div>
+      <div class="my-form-group">
+         <label asp-for="Status" class="my-form-label">Статус:</label>
+         <textarea asp-for="Status" class="my-form-textarea my-textarea-small"></textarea>
+         <span asp-validation-for="Status"></span>
+      </div>
+      <div class="my-form-group">
+         <label asp-for="Roles" class="my-form-label">Роли:</label>
+         <select multiple asp-for="Roles">
+            @foreach (var role in Model.RolesHelper)
+            {
+               if (role.IsAdded)
+               {
+                  <option selected>@role.Name</option>
+               }
+                  else
+               {
+                  <option>@role.Name</option>
+               }
+            }
+         </select>
+      </div>
+      <div class="my-form-group">        
+         <input asp-for="Id" type="hidden"/>
+         <input type="submit" class="btn btn-success" value="Сохранить изменения">
+      </div>
+   </form>
+</div>

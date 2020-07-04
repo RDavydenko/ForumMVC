@@ -1,0 +1,159 @@
+﻿@model MyForum.Models.Message
+@{
+	Layout = "_Layout";
+	ViewData["Title"] = "Сообщение ";
+}
+<link href="~/css/my-tables.css" rel="stylesheet" />
+
+<a id="toTheme" asp-action="ThemeByMessage" asp-controller="Forum" asp-route-messageId="@Model.Id" asp-route-themeId="@Model.Theme.Id" class="btn btn-sm btn-primary" style="color: #fff">Тема этого сообщения</a>
+
+<table id="@Model.Id" class="my-table my-table-message">
+	<tr class="message-data">
+		<td class="td-message-data" colspan="2">
+			<img src="~/images/icon-clock.png" alt="" class="message-data__clock-img">
+			<div class="message-data__time">@Model.CreatingTime.ToString("dd.MM.yyyy, HH:mm")</div>
+			<button class="message-actions-btn action-btn">
+				<div class="action-btn__actions">
+					<a asp-action="OneMessage" asp-controller="Forum" asp-route-id="@(Model.Id.ToString())" target="_blank" class="action-btn__action">Просмотр сообщения</a>
+					<div id="@("yakor-link-" + Model.Id.ToString())" class="action-btn__action">Копировать якорную ссылку</div>
+					@{
+						// Получение якорной ссылки
+					}
+					<script>
+							$(document).ready(function() {
+								$('@("#yakor-link-" + Model.Id.ToString())').click(function (e) {
+									$.ajax({
+										url: '/Forum/YakorLink',
+										type: 'GET',
+										data: { messageId: '@Model.Id', themeId: '@Model.Theme.Id' },
+										success: function (result) {
+											prompt('Якорная ссылка на сообщение:', result);
+										},
+										error: function () {
+											alert('Возникла ошибка');
+										}
+									});									
+								});
+							});
+					</script>
+					<div id="@("report-message-" + Model.Id.ToString())" class="action-btn__action">Пожаловаться</div>
+					@{
+						// Отправка жалобы на сообщение
+					}
+					<script>
+							$(document).ready(function() {
+								$('@("#report-message-" + Model.Id.ToString())').click(function (e) {
+									let text = prompt('Опишите причину жалобы:');
+									if (text != null && text != '') {
+										$.ajax({
+											url: '/Forum/Report',
+											type: 'POST',
+											data: { id: '@Model.Id',objectType:'message', text: text },
+											success: function () {
+												alert('Жалоба отправлена');
+											},
+											error: function () {
+												alert('Возникла ошибка при отправке жалобы');
+											}
+										});
+									}
+								});
+							});
+					</script>
+					@if (!Model.Author.IsSilenced)
+					{
+						<div id="@("silence-" + Model.Id.ToString())" class="action-btn__action">Заморозить пользователя</div>
+						// Заморозить пользователя
+						<script>
+							$(document).ready(function() {
+								$('@("#silence-" + Model.Id.ToString())').click(function (e) {
+									let minutes = prompt('На сколько минут заблокировать пользователя?\n60 - час\n1440 - день\n10080 - неделя\n43200 - месяц (30 дней)');
+									if (minutes <= 0) {
+										return;
+									}
+									$.ajax({
+										url: '/Forum/SilenceUser',
+										type: 'POST',
+										data: { id: '@Model.Author.Id', minutes: minutes},
+										success: function () {
+											alert('Пользователь заморожен');
+											location.reload();
+										},
+										error: function () {
+											alert('Произошла ошибка');
+										}
+									});
+								});
+							});
+						</script>
+					}
+					else if (Model.Author.IsSilenced)
+					{
+						<div id="@("unsilence-" + Model.Id.ToString())" class="action-btn__action">Разморозить пользователя</div>
+						// Разморозить пользователя
+						<script>
+								$('@("#unsilence-" + Model.Id.ToString())').click(function (e) {
+									$.ajax({
+										url: '/Forum/UnsilenceUser',
+										type: 'POST',
+										data: { id: '@Model.Author.Id' },
+										success: function () {
+											alert('Пользователь разморожен');
+											location.reload();
+										},
+										error: function () {
+											alert('Произошла ошибка');
+										}
+									});
+								});
+						</script>
+					}
+					<div id="@("delete-message-" + Model.Id.ToString())" class="action-btn__action">Удалить</div>
+					@{
+						// Удалить сообщение
+					}
+					<script>
+							$(document).ready(function() {
+								$('@("#delete-message-" + Model.Id.ToString())').click(function (e) {
+									$.ajax({
+										url: '/Forum/DeleteMessage',
+										type: 'POST',
+										data: { id: '@Model.Id' },
+
+										success: function () {
+											alert('Сообщение удалено');
+											location.reload();
+										},
+										error: function () {
+											alert('Возникла ошибка при удалении сообщения');
+										}
+									});
+								});
+							});
+					</script>
+				</div>
+			</button>
+		</td>
+	</tr>
+	<tr class="tr-message">
+		<td class="td-content message-author">
+			<div class="about-author">
+				<a asp-action="AboutUser" asp-controller="Forum" asp-route-id="@Model.Author.Id" class="about-author__username">@Model.Author.UserName</a>
+				<div class="about-author__status">@Model.Author.Status</div>
+				<div class="about-author__avatar"><img src="~/images/icon-user-no-photo.png" alt=""></div>
+				<div class="about-author__registration-date">Регистрация: @Model.Author.RegistrationDate.ToString("dd.MM.yyyy")</div>
+				<div class="about-author__count-of-messages">Сообщений: @Model.Author.Messages.Count</div>
+			</div>
+		</td>
+		<td class="td-content message-text">
+			<div class="message-content">
+				<div class="message-content__text">
+					@Model.Text
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
+
+
+<script src="~/js/action-btn.js"></script>

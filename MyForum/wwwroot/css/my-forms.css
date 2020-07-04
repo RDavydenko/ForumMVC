@@ -1,0 +1,50 @@
+.my-form-wrap {
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.my-form-group {
+  padding-bottom: 5px;
+}
+
+.my-form-group::after {
+  content: " ";
+  clear: both;
+  display: table;
+}
+
+.my-form-group .my-form-label {
+  vertical-align: top;
+  float: left;
+  width: 15%;
+}
+
+.my-form-group .my-form-textarea {
+  overflow-x: hidden;
+  resize: none;
+  float: left;
+  width: 60%;
+}
+
+.my-form-group .my-validation-span {
+  vertical-align: top;
+  width: 20%;
+}
+
+.my-form__info-block {
+  padding-bottom: 10px;
+}
+
+.my-form__info-block .info-block__item {
+  border-bottom: 1px solid #A9A9A9;
+  padding-bottom: 5px;
+}
+
+.my-textarea-big {
+  height: 300px;
+}
+
+.my-textarea-small {
+  height: 100px;
+}
